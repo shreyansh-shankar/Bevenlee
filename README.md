@@ -1,2 +1,2 @@
 # Bevenlee
-Making Spliting expenses simple
+Track you skills, courses, and more...
