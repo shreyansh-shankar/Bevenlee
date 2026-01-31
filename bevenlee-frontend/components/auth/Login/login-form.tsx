@@ -50,16 +50,20 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      {/* Google Auth */}
-      <GoogleAuthButton />
-
-      <div className="relative text-center text-sm">
-        <span className="bg-background px-2 text-muted-foreground">
-          Or continue with email
-        </span>
-      </div>
       <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Welcome Back</CardTitle>
+          <CardDescription>Log In into your existing account</CardDescription>
+        </CardHeader>
+        <CardContent></CardContent>
         <CardContent>
+          {/* Google Auth */}
+          <GoogleAuthButton />
+          <div className="relative text-center text-sm my-7">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with email
+            </span>
+          </div>
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               {/* Email */}
@@ -101,14 +105,14 @@ export function LoginForm({
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </div>
-
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/auth/sign-up" className="underline underline-offset-4">
-                Sign up
-              </Link>
-            </div>
           </form>
+
+          <div className="mt-7 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="/auth/sign-up" className="underline underline-offset-4">
+              Sign up
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
