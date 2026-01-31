@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-// The client you created from the Server-Side Auth instructions
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
@@ -16,6 +15,28 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      const { data: { user }, } = await supabase.auth.getUser();
+
+      if (user) {
+        const fullName = user.user_metadata?.full_name || "";
+        const [first_name = "", last_name = ""] = fullName.split(" ");
+
+        await fetch(`${process.env.BACKEND_URL}/auth/oauth`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+            email: user.email,
+            first_name,
+            last_name,
+            provider: user.app_metadata?.provider,
+          }),
+        });
+      }
+
+      // Redirect logic
       const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === 'development'
       if (isLocalEnv) {
