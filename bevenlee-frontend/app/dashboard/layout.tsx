@@ -1,6 +1,7 @@
 import { AuthButton } from "@/components/auth/AuthButton";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export default function ProtectedLayout({
   children,
@@ -15,7 +16,9 @@ export default function ProtectedLayout({
             <div className="flex gap-5 items-center font-semibold">
               <Link href={"/"}>Next.js Supabase Starter</Link>
             </div>
-        <AuthButton></AuthButton>
+        <Suspense>
+          <AuthButton></AuthButton>
+        </Suspense>
           </div>
         </nav>
         <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
