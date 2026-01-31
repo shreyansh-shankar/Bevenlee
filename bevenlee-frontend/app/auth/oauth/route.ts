@@ -21,7 +21,7 @@ export async function GET(request: Request) {
         const fullName = user.user_metadata?.full_name || "";
         const [first_name = "", last_name = ""] = fullName.split(" ");
 
-        await fetch(`${process.env.BACKEND_URL}/auth/oauth`, {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/oauth`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
