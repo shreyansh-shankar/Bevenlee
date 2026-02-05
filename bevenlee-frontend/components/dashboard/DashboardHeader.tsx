@@ -4,13 +4,12 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { AddCourseModal } from "./AddCourseModal";
 
-export function DashboardHeader() {
-  const [open, setOpen] = useState(false);
+interface DashboardHeaderProps {
+  userId: string;
+}
 
-  const handleSubmit = (course: any) => {
-    console.log("New Course Data:", course);
-    // TODO: Send to backend
-  };
+export function DashboardHeader({ userId }: DashboardHeaderProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -34,8 +33,9 @@ export function DashboardHeader() {
       <AddCourseModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        onSubmit={handleSubmit}
+        userId={userId}
       />
     </>
   );
 }
+

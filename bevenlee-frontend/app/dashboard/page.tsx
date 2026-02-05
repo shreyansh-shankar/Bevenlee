@@ -1,13 +1,5 @@
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { CourseGrid } from "@/components/dashboard/CourseGrid";
-import { mockCourses } from "@/lib/course/mock-data";
+import DashboardClient from "@/components/dashboard/DashboardClient";
 
-export default async function ProtectedPage() {
-
-  return (
-    <div className="flex flex-col gap-10">
-      <DashboardHeader />
-      <CourseGrid courses={mockCourses} />
-    </div>
-  );
+export default function DashboardPage() {
+  return <DashboardClient />;
 }
