@@ -19,15 +19,16 @@ interface AddCourseModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
+  onCreated: () => void;
 }
 
-export function AddCourseModal({ isOpen, onClose, userId }: AddCourseModalProps) {
+export function AddCourseModal({ isOpen, onClose, userId, onCreated }: AddCourseModalProps) {
   const [name, setName] = useState("");
   const [purpose, setPurpose] = useState("");
   const [status, setStatus] =
     useState<"planned" | "active" | "paused" | "completed">("planned");
-  const [projects, setProjects] = useState(true);
-  const [assignments, setAssignments] = useState(true);
+  const [projects_enabled, setProjects] = useState(true);
+  const [assignments_enabled, setAssignments] = useState(true);
   const [type, setType] = useState("");
   const [priority, setPriority] =
     useState<"low" | "medium" | "high">("medium");
@@ -49,6 +50,8 @@ export function AddCourseModal({ isOpen, onClose, userId }: AddCourseModalProps)
         type,
         status,
         priority,
+        projects_enabled,
+        assignments_enabled,
       });
 
       // reset
@@ -60,6 +63,7 @@ export function AddCourseModal({ isOpen, onClose, userId }: AddCourseModalProps)
       setProjects(true);
       setAssignments(true);
 
+      onCreated();
       onClose();
     } catch (err: any) {
       setError(err.message);
@@ -169,7 +173,7 @@ export function AddCourseModal({ isOpen, onClose, userId }: AddCourseModalProps)
               </span>
               <Checkbox
                 className="h-6 w-6"
-                checked={projects}
+                checked={projects_enabled}
                 onCheckedChange={(c) => setProjects(!!c)}
               />
             </div>
@@ -179,7 +183,7 @@ export function AddCourseModal({ isOpen, onClose, userId }: AddCourseModalProps)
               </span>
               <Checkbox
                 className="h-6 w-6"
-                checked={assignments}
+                checked={assignments_enabled}
                 onCheckedChange={(c) => setAssignments(!!c)}
               />
             </div>

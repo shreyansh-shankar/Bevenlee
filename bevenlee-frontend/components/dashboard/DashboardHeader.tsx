@@ -6,9 +6,10 @@ import { AddCourseModal } from "./AddCourseModal";
 
 interface DashboardHeaderProps {
   userId: string;
+  onCourseCreated: () => void;
 }
 
-export function DashboardHeader({ userId }: DashboardHeaderProps) {
+export function DashboardHeader({ userId, onCourseCreated }: DashboardHeaderProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -34,6 +35,7 @@ export function DashboardHeader({ userId }: DashboardHeaderProps) {
         isOpen={open}
         onClose={() => setOpen(false)}
         userId={userId}
+        onCreated={onCourseCreated}
       />
     </>
   );
