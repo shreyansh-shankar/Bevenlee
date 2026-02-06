@@ -37,7 +37,7 @@ export function CourseCard({ course }: Props) {
       {/* Footer */}
       <div className="mt-auto flex justify-end">
         <Link
-          href={`/dashboard/course/${course.course_id}`}
+          href={`/course/${course.course_id}`}
           className="inline-flex items-center gap-2 text-sm font-medium hover:opacity-80 transition"
         >
           Open course

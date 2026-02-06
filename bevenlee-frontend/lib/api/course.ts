@@ -20,6 +20,65 @@ export interface Course {
   created_at: string
 }
 
+export interface Subtopic {
+  subtopic_id: string
+  topic_id: string
+  title: string
+  is_completed: boolean
+  position: number
+}
+
+export interface Topic {
+  topic_id: string
+  title: string
+  status: string
+  position: number
+  subtopics: Subtopic[]
+}
+
+export interface Resource {
+  resource_id: string
+  course_id: string | null
+  topic_id: string | null
+  title: string
+  url: string
+}
+
+export interface Project {
+  project_id: string
+  course_id: string
+  title: string
+  status: string
+  description: string | null
+}
+
+export interface Assignment {
+  assignment_id: string
+  course_id: string
+  title: string
+  status: string
+  description: string | null
+}
+
+export interface CourseDetail {
+  course_id: string
+  title: string
+  purpose?: string | null
+  type: string
+  status: "planned" | "active" | "paused" | "completed"
+  priority: "low" | "medium" | "high"
+  projects_enabled: boolean
+  assignments_enabled: boolean
+}
+
+export interface CourseDetailResponse {
+  course: CourseDetail
+  topics: Topic[]
+  resources: Resource[]
+  projects: Project[]
+  assignments: Assignment[]
+}
+
 export async function createCourse(payload: CreateCoursePayload) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/course`,
@@ -61,4 +120,28 @@ export async function getCoursesByUser(userId: string): Promise<Course[]> {
 
   // backend returns { status, courses }
   return data.courses as Course[]
+}
+
+export async function getCourseDetail(
+  courseId: string
+): Promise<CourseDetailResponse> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/detail/${courseId}`,
+    { cache: "no-store" }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch course detail");
+  }
+
+  const data = await res.json();
+  const payload = data.course;
+
+  return {
+    course: payload.course,
+    topics: payload.topics ?? [],
+    resources: payload.resources ?? [],
+    projects: payload.projects ?? [],
+    assignments: payload.assignments ?? [],
+  };
 }
