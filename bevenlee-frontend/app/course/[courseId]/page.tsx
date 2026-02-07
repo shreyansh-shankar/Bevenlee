@@ -3,6 +3,7 @@ import { getCourseDetail } from "@/lib/api/course";
 import { CourseClientPage } from "@/components/course/CourseClientPage";
 import { CourseLayout } from "@/components/course/CourseLayout";
 import { Navbar } from "@/components/Navbar";
+import { CourseEditorProvider } from "@/components/course/editor/CourseEditorProvider";
 
 interface PageProps {
     params: Promise<{ courseId: string }>;
@@ -21,7 +22,11 @@ async function CourseContent({ params }: { params: PageProps["params"] }) {
     const { courseId } = await params;
     const data = await getCourseDetail(courseId);
 
-    return <CourseClientPage {...data} />;
+    return (
+    <CourseEditorProvider initialData={data}>
+      <CourseClientPage />
+    </CourseEditorProvider>
+  );
 }
 
 export default function CoursePage({ params }: PageProps) {

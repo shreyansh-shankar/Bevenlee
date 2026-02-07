@@ -13,18 +13,20 @@ import { Switch } from "@/components/ui/switch";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EditableField } from "../ui/EditableField";
 
-export function CourseHeader({
-  course,
-  onChange,
-}: {
-  course: any;
-  onChange: (updated: any) => void;
-}) {
-  if (!course) return null;
+import { useCourseEditor } from "./editor/CourseEditorContext";
 
-  const update = (patch: Partial<any>) => {
-    onChange({ ...course, ...patch });
+export function CourseHeader() {
+  const { draft, setDraft, markDirty } = useCourseEditor();
+
+  const update = (patch: Partial<typeof draft>) => {
+    setDraft(d => ({
+      ...d,
+      ...patch,
+      isDirty: true,
+    }));
   };
+
+  if (!draft) return null;
 
   return (
     <div className="flex flex-col gap-6 pb-8">
@@ -32,7 +34,7 @@ export function CourseHeader({
       <div className="flex flex-col gap-4 max-w-5xl">
         {/* TITLE */}
         <EditableField
-          value={course.title}
+          value={draft.title}
           onChange={(v) => update({ title: v })}
           className="text-3xl font-semibold tracking-tight"
         >
@@ -59,7 +61,7 @@ export function CourseHeader({
         <div className="flex items-center gap-6 text-sm text-muted-foreground">
           {/* TYPE */}
           <EditableField
-            value={course.type}
+            value={draft.type}
             onChange={(v) => update({ type: v })}
           >
             {({ value, onChange, onBlur }) => (
@@ -82,8 +84,10 @@ export function CourseHeader({
 
           {/* PRIORITY */}
           <Select
-            value={course.priority}
-            onValueChange={(v) => update({ priority: v })}
+            value={draft.priority}
+            onValueChange={(v) =>
+              update({ priority: v as typeof draft.priority })
+            }
           >
             <SelectTrigger className="h-8 w-32 px-3 text-sm">
               <SelectValue />
@@ -95,10 +99,12 @@ export function CourseHeader({
             </SelectContent>
           </Select>
 
-          {/* STATUS (editable again) */}
+          {/* STATUS */}
           <Select
-            value={course.status}
-            onValueChange={(v) => update({ status: v })}
+            value={draft.status}
+            onValueChange={(v) =>
+              update({ status: v as typeof draft.status })
+            }
           >
             <SelectTrigger className="h-8 w-36 px-3 text-sm">
               <SelectValue />
@@ -111,14 +117,13 @@ export function CourseHeader({
             </SelectContent>
           </Select>
 
-          {/* STATUS FEEDBACK */}
-          <StatusBadge status={course.status} />
+          <StatusBadge status={draft.status} />
         </div>
       </div>
 
       {/* ───────── DESCRIPTION ───────── */}
       <EditableField
-        value={course.purpose || "Add a short description…"}
+        value={draft.purpose || "Add a short description…"}
         onChange={(v) => update({ purpose: v })}
         className="text-sm text-muted-foreground max-w-4xl"
       >
@@ -146,7 +151,7 @@ export function CourseHeader({
       <div className="flex gap-8 pt-2 text-sm text-muted-foreground">
         <label className="flex items-center gap-2">
           <Switch
-            checked={course.projects_enabled}
+            checked={draft.projects_enabled}
             onCheckedChange={(v) =>
               update({ projects_enabled: v })
             }
@@ -156,7 +161,7 @@ export function CourseHeader({
 
         <label className="flex items-center gap-2">
           <Switch
-            checked={course.assignments_enabled}
+            checked={draft.assignments_enabled}
             onCheckedChange={(v) =>
               update({ assignments_enabled: v })
             }

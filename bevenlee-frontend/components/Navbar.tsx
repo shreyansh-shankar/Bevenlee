@@ -9,7 +9,7 @@ export function Navbar() {
       <div className="h-16 w-full px-6 flex items-center justify-between">
         {/* Brand */}
         <Link
-          href="/"
+          href="/dashboard"
           className="font-semibold text-sm tracking-tight hover:opacity-80 transition"
         >
           APP-NAME

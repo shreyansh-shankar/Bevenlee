@@ -21,7 +21,7 @@ export interface Course {
 }
 
 export interface Subtopic {
-  subtopic_id: string
+  subtopic_id: string | null
   topic_id: string
   title: string
   is_completed: boolean
@@ -29,7 +29,7 @@ export interface Subtopic {
 }
 
 export interface Topic {
-  topic_id: string
+  topic_id: string | null
   title: string
   status: string
   position: number
@@ -37,7 +37,7 @@ export interface Topic {
 }
 
 export interface Resource {
-  resource_id: string
+  resource_id: string | null
   course_id: string | null
   topic_id: string | null
   title: string
@@ -45,7 +45,7 @@ export interface Resource {
 }
 
 export interface Project {
-  project_id: string
+  project_id: string | null
   course_id: string
   title: string
   status: string
@@ -53,7 +53,7 @@ export interface Project {
 }
 
 export interface Assignment {
-  assignment_id: string
+  assignment_id: string | null
   course_id: string
   title: string
   status: string
@@ -145,3 +145,46 @@ export async function getCourseDetail(
     assignments: payload.assignments ?? [],
   };
 }
+
+  // ─────────────────────────────────────────────
+  // Save / Update full course aggregate
+  // ─────────────────────────────────────────────
+
+  export async function saveCourse(
+    courseId: string,
+    payload: {
+      course_id: string;
+      course: {
+        title: string;
+        type: string;
+        status: string;
+        priority: string;
+        purpose?: string | null;
+        projects_enabled: boolean;
+        assignments_enabled: boolean;
+      };
+      topics: Topic[];
+      resources: Resource[];
+      projects: Project[];
+      assignments: Assignment[];
+    }
+  ) {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/save/${courseId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.detail || "Failed to save course");
+    }
+
+    return res.json();
+  }
