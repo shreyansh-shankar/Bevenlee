@@ -112,7 +112,7 @@ export function TopicsSection() {
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
                         className={`flex items-center justify-between py-2 px-2 rounded transition-colors duration-150 ${snapshot.isDragging
-                            ? "bg-gray-100 dark:bg-gray-700"
+                            ? "bg-gray-100 dark:bg-gray-900"
                             : "hover:bg-gray-50 dark:hover:bg-gray-900"
                           }`}
                       >
