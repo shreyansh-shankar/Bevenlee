@@ -117,9 +117,57 @@ export async function getCoursesByUser(userId: string): Promise<Course[]> {
   }
 
   const data = await res.json()
+  console.log("Dashborad fetch data: ", data)
 
   // backend returns { status, courses }
   return data.courses as Course[]
+}
+
+export async function updateCourseMetadata(
+  courseId: string,
+  updates: {
+    title?: string
+    type?: string
+    purpose?: string
+    status?: "planned" | "active" | "paused" | "completed"
+    priority?: "low" | "medium" | "high"
+    projects_enabled?: boolean
+    assignments_enabled?: boolean
+  }
+) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/${courseId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updates),
+    }
+  )
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.detail || "Failed to update course")
+  }
+
+  return await res.json()
+}
+
+export async function deleteCourse(courseId: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/${courseId}`,
+    {
+      method: "DELETE",
+    }
+  )
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.detail || "Failed to delete course")
+  }
+
+  return true
 }
 
 export async function getCourseDetail(

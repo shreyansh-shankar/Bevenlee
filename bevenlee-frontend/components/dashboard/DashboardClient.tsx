@@ -7,6 +7,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { CourseGrid } from "@/components/dashboard/CourseGrid";
 import { getCoursesByUser, Course } from "@/lib/api/course";
+import { EditCourseDialog } from "./EditCourseDialog";
 
 export default function DashboardClient() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function DashboardClient() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [coursesLoading, setCoursesLoading] = useState(true);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,6 +35,10 @@ export default function DashboardClient() {
       setCoursesLoading(false);
     }
   }, []);
+
+  function handleDeleted(courseId: string) {
+    setCourses(prev => prev.filter(c => c.course_id !== courseId))
+  }
 
   // Get logged in user
   useEffect(() => {
@@ -66,7 +72,21 @@ export default function DashboardClient() {
       {coursesLoading ? (
         <p className="text-muted-foreground">Loading courses...</p>
       ) : (
-        <CourseGrid courses={courses} />
+        <CourseGrid
+          courses={courses}
+          onEdit={setEditingCourse}
+          onDeleted={handleDeleted}
+        />
+      )}
+      {editingCourse && (
+        <EditCourseDialog
+          course={editingCourse}
+          onClose={() => setEditingCourse(null)}
+          onSaved={() => {
+            setEditingCourse(null)
+            fetchCourses(userId!)
+          }}
+        />
       )}
     </div>
   );
