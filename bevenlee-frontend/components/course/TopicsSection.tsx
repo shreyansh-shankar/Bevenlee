@@ -200,8 +200,8 @@ export function TopicsSection() {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           className={`rounded transition-colors duration-150 ${snapshot.isDragging
-                              ? "bg-gray-100 dark:bg-gray-900"
-                              : "hover:bg-gray-50 dark:hover:bg-gray-900"
+                            ? "bg-gray-100 dark:bg-gray-900"
+                            : "hover:bg-gray-50 dark:hover:bg-gray-900"
                             }`}
                         >
                           {/* TOPIC ROW */}
@@ -274,7 +274,7 @@ export function TopicsSection() {
                               {subs.map(sub => (
                                 <div
                                   key={sub.id}
-                                  className="flex items-center gap-2 py-1 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-900"
+                                  className="group flex items-center gap-2 py-1 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-900"
                                 >
                                   <Checkbox
                                     checked={sub.is_completed}
@@ -314,12 +314,20 @@ export function TopicsSection() {
                                         }
                                         onBlur={onBlur}
                                         className={`border-none px-0 py-1 text-sm bg-transparent focus:ring-0 ${sub.is_completed
-                                            ? "line-through text-muted-foreground"
-                                            : ""
+                                          ? "line-through text-muted-foreground"
+                                          : ""
                                           }`}
                                       />
                                     )}
                                   </EditableField>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => deleteSubtopic(topic.id, sub.id)}
+                                    className="opacity-0 group-hover:opacity-100 transition"
+                                  >
+                                    <Trash2 className="h-3 w-3 text-gray-400 hover:text-red-500" />
+                                  </Button>
                                 </div>
                               ))}
 
