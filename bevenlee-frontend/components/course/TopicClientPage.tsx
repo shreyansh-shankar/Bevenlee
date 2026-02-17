@@ -51,11 +51,6 @@ export default function TopicClientPage({ topicId, courseId }: Props) {
     markDirty()
   }
 
-  function handleDeleteTopic() {
-    setDraft(d => deleteTopic(d, currentTopic.id))
-    markDirty()
-  }
-
   function handleAddSubtopic() {
     setDraft(d => addSubtopic(d, currentTopic.id))
     markDirty()
@@ -131,14 +126,6 @@ export default function TopicClientPage({ topicId, courseId }: Props) {
             onClick={() => setEditingTopic(true)}
           >
             <Pencil className="w-4 h-4 text-muted-foreground" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDeleteTopic}
-          >
-            <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
           </Button>
         </div>
       </div>
