@@ -1,6 +1,7 @@
 "use client"
 
 import TopicSidebar from "@/components/course/TopicSidebar"
+import TopicWhiteboard from "./TopicWhiteboard"
 
 interface Props {
   topicId: string
@@ -9,14 +10,12 @@ interface Props {
 
 export default function TopicClientPage({ topicId, courseId }: Props) {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full overflow-hidden">
       <TopicSidebar topicId={topicId} courseId={courseId} />
 
       {/* Canvas Area */}
-      <main className="flex-1 flex items-center justify-center bg-background">
-        <div className="text-muted-foreground text-sm">
-          Canvas editor will live here.
-        </div>
+      <main className="flex-1 h-full">
+        <TopicWhiteboard documentId={topicId} />
       </main>
     </div>
   )

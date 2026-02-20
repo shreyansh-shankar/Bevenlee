@@ -24,12 +24,14 @@ async function LayoutContent({
 
 export default function CourseLayoutWrapper(props: Props) {
   return (
-    <>
+    <div className="flex flex-col h-screen">
       <Navbar />
 
-      <Suspense fallback={<div className="p-6">Loading course...</div>}>
-        <LayoutContent {...props} />
-      </Suspense>
-    </>
+      <div className="flex-1 overflow-hidden">
+        <Suspense fallback={<div className="p-6">Loading course...</div>}>
+          <LayoutContent {...props} />
+        </Suspense>
+      </div>
+    </div>
   )
 }

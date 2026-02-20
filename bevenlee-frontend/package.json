@@ -22,7 +22,7 @@
     "@shadcn/ui": "^0.0.4",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.93.3",
-    "@tldraw/tldraw": "^4.4.0",
+    "@tldraw/tldraw": "^3.7.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
