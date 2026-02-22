@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { X } from "lucide-react";
-
+import { APIError } from "@/lib/api/course";
+import { UpgradeModal } from "@/components/subscription/UpgradeModal";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { createCourseAction } from "@/lib/course/createCourseAction";
@@ -38,7 +39,7 @@ export function AddCourseModal({
     useState<"low" | "medium" | "high">("medium");
   const [projectsEnabled, setProjectsEnabled] = useState(true);
   const [assignmentsEnabled, setAssignmentsEnabled] = useState(true);
-
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,8 +75,17 @@ export function AddCourseModal({
       resetForm();
       onCreated();
       onClose();
+
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create course");
+      if (err instanceof APIError) {
+        if (err.code === "PLAN_LIMIT_EXCEEDED") {
+          setShowUpgrade(true);
+          return;
+        }
+        setError(err.message);
+        return;
+      }
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -86,7 +96,7 @@ export function AddCourseModal({
       <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="mx-auto w-full max-w-lg rounded-xl bg-card border border-border p-6 shadow-sm flex flex-col gap-5">
-          
+
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <Dialog.Title className="text-xl font-semibold">
@@ -204,6 +214,11 @@ export function AddCourseModal({
             {loading ? "Creating..." : "Create Course"}
           </Button>
         </Dialog.Panel>
+        <UpgradeModal
+          isOpen={showUpgrade}
+          onClose={() => setShowUpgrade(false)}
+          message="You’ve reached the course limit for your current plan. Upgrade to create more courses."
+        />
       </div>
     </Dialog>
   );

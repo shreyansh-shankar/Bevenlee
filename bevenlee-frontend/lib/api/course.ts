@@ -79,6 +79,17 @@ export interface CourseDetailResponse {
   assignments: Assignment[]
 }
 
+export class APIError extends Error {
+  status: number
+  code?: string
+
+  constructor(message: string, status: number, code?: string) {
+    super(message)
+    this.status = status
+    this.code = code
+  }
+}
+
 export async function createCourse(payload: CreateCoursePayload) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/course`,
@@ -91,12 +102,17 @@ export async function createCourse(payload: CreateCoursePayload) {
     }
   )
 
+  const data = await res.json()
+
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.detail || "Failed to create course")
+    throw new APIError(
+      data?.detail?.message || "Failed to create course",
+      res.status,
+      data?.detail?.error
+    )
   }
 
-  return res.json()
+  return data
 }
 
 export async function getCoursesByUser(userId: string): Promise<Course[]> {
