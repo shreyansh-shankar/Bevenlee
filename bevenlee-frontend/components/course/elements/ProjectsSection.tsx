@@ -2,13 +2,11 @@
 
 import { v4 as uuid } from "uuid";
 import { Plus, Trash2 } from "lucide-react";
-
-import { CourseSection } from "./CourseSection";
+import { CourseSection } from "../CourseSection";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { EditableField } from "@/components/ui/EditableField";
 import { Button } from "@/components/ui/button";
-
 import {
   Select,
   SelectContent,
@@ -16,9 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { DraftProject } from "@/lib/course/draft";
-import { useCourseEditor } from "./editor/CourseEditorContext";
+import { useCourseEditor } from "../editor/CourseEditorContext";
 
 export function ProjectsSection() {
   const { draft, setDraft, markDirty } = useCourseEditor();

@@ -1,7 +1,7 @@
 "use client";
 
 import { v4 as uuid } from "uuid";
-import { CourseSection } from "./CourseSection";
+import { CourseSection } from "../CourseSection";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, GripVertical, ChevronDown, ChevronRight, Pencil } from "lucide-react";
@@ -9,8 +9,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-
-import { useCourseEditor } from "./editor/CourseEditorContext";
+import { useCourseEditor } from "../editor/CourseEditorContext";
 import { DraftSubtopic, DraftTopic } from "@/lib/course/draft";
 
 export function TopicsSection() {

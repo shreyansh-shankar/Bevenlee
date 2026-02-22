@@ -3,13 +3,12 @@
 import { v4 as uuid } from "uuid";
 import { ExternalLink, Plus, Trash2 } from "lucide-react"; // Added Trash2
 
-import { CourseSection } from "./CourseSection";
+import { CourseSection } from "../CourseSection";
 import { EditableField } from "@/components/ui/EditableField";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
 import { DraftResource } from "@/lib/course/draft";
-import { useCourseEditor } from "./editor/CourseEditorContext";
+import { useCourseEditor } from "../editor/CourseEditorContext";
 
 export function ResourcesSection() {
   const { draft, setDraft, markDirty } = useCourseEditor();
