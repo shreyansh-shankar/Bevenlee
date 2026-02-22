@@ -23,8 +23,6 @@ export async function GET(req: NextRequest) {
     const text = await data.text()
     const snapshot = JSON.parse(text)
 
-    console.log(snapshot)
-
     return NextResponse.json(snapshot)
   } catch (err) {
     console.error("Error loading whiteboard:", err)

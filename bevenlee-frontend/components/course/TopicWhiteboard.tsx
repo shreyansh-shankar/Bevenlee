@@ -49,7 +49,9 @@ export default function TopicWhiteboard({ documentId }: Props) {
         const latest = editor.store.getSnapshot()
         localStorage.setItem(`whiteboard-${documentId}`, JSON.stringify(latest))
       }, 500)
-    })
+    },
+      { source: "user", scope: "document" }
+    )
 
     return () => {
       cleanup()
