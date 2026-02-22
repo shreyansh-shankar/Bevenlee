@@ -1,11 +1,11 @@
 "use client";
 
 import { CourseLayout } from "./CourseLayout";
-import { CourseHeader } from "./CourseHeader";
-import { TopicsSection } from "./TopicsSection";
-import { ResourcesSection } from "./ResourcesSection";
-import { ProjectsSection } from "./ProjectsSection";
-import { AssignmentsSection } from "./AssignmentsSection";
+import { CourseHeader } from "./elements/CourseHeader";
+import { TopicsSection } from "./elements/TopicsSection";
+import { ResourcesSection } from "./elements/ResourcesSection";
+import { ProjectsSection } from "./elements/ProjectsSection";
+import { AssignmentsSection } from "./elements/AssignmentsSection";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 

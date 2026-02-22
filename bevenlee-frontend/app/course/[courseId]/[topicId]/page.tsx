@@ -1,4 +1,4 @@
-import TopicClientPage from "@/components/course/TopicClientPage";
+import TopicClientPage from "@/components/course/topics/TopicClientPage";
 
 interface PageProps {
   params: Promise<{

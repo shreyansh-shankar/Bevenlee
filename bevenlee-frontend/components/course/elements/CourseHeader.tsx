@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { EditableField } from "../ui/EditableField";
+import { EditableField } from "../../ui/EditableField";
 
-import { useCourseEditor } from "./editor/CourseEditorContext";
+import { useCourseEditor } from "../editor/CourseEditorContext";
 
 export function CourseHeader() {
   const { draft, setDraft, markDirty } = useCourseEditor();

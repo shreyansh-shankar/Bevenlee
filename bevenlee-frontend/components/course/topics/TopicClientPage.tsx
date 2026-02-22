@@ -1,6 +1,6 @@
 "use client"
 
-import TopicSidebar from "@/components/course/TopicSidebar"
+import TopicSidebar from "@/components/course/topics/TopicSidebar"
 import TopicWhiteboard from "./TopicWhiteboard"
 
 interface Props {
