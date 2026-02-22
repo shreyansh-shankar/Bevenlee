@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GoogleAuthButton } from "../OAuth/GoogleAuthButton";
+import { loginWithEmail } from "@/lib/auth/login";
 import {
   Card,
   CardContent,
@@ -29,39 +29,11 @@ export function LoginForm({
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
-
-      // Get logged-in user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      // 3️⃣ Sync with backend
-      if (user) {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: user.id,
-            email: user.email,
-            full_name: user.user_metadata?.full_name ?? null,
-            provider: "email",
-          }),
-        });
-      }
-
-      // Update this route to redirect to an authenticated route. The user already has an active session.
+      await loginWithEmail({ email, password });
       router.push("/dashboard");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
