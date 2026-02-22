@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { createCourse } from "@/lib/api/course";
+import { createCourseAction } from "@/lib/course/createCourseAction";
 
 import {
   Select,
@@ -22,19 +23,35 @@ interface AddCourseModalProps {
   onCreated: () => void;
 }
 
-export function AddCourseModal({ isOpen, onClose, userId, onCreated }: AddCourseModalProps) {
+export function AddCourseModal({
+  isOpen,
+  onClose,
+  userId,
+  onCreated,
+}: AddCourseModalProps) {
   const [name, setName] = useState("");
   const [purpose, setPurpose] = useState("");
+  const [type, setType] = useState("");
   const [status, setStatus] =
     useState<"planned" | "active" | "paused" | "completed">("planned");
-  const [projects_enabled, setProjects] = useState(true);
-  const [assignments_enabled, setAssignments] = useState(true);
-  const [type, setType] = useState("");
   const [priority, setPriority] =
     useState<"low" | "medium" | "high">("medium");
+  const [projectsEnabled, setProjectsEnabled] = useState(true);
+  const [assignmentsEnabled, setAssignmentsEnabled] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resetForm = () => {
+    setName("");
+    setPurpose("");
+    setType("");
+    setStatus("planned");
+    setPriority("medium");
+    setProjectsEnabled(true);
+    setAssignmentsEnabled(true);
+    setError(null);
+  };
 
   const handleSubmit = async () => {
     if (!name || !type) return;
@@ -43,30 +60,22 @@ export function AddCourseModal({ isOpen, onClose, userId, onCreated }: AddCourse
     setError(null);
 
     try {
-      await createCourse({
-        user_id: userId,
+      await createCourseAction({
+        userId,
         title: name,
         purpose: purpose || undefined,
         type,
         status,
         priority,
-        projects_enabled,
-        assignments_enabled,
+        projectsEnabled,
+        assignmentsEnabled,
       });
 
-      // reset
-      setName("");
-      setPurpose("");
-      setType("");
-      setStatus("planned");
-      setPriority("medium");
-      setProjects(true);
-      setAssignments(true);
-
+      resetForm();
       onCreated();
       onClose();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to create course");
     } finally {
       setLoading(false);
     }
@@ -77,7 +86,7 @@ export function AddCourseModal({ isOpen, onClose, userId, onCreated }: AddCourse
       <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="mx-auto w-full max-w-lg rounded-xl bg-card border border-border p-6 shadow-sm flex flex-col gap-5">
-
+          
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <Dialog.Title className="text-xl font-semibold">
@@ -104,7 +113,7 @@ export function AddCourseModal({ isOpen, onClose, userId, onCreated }: AddCourse
             />
           </div>
 
-          {/* Purpose (optional) */}
+          {/* Purpose */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-muted-foreground">
               Purpose
@@ -173,8 +182,8 @@ export function AddCourseModal({ isOpen, onClose, userId, onCreated }: AddCourse
               </span>
               <Checkbox
                 className="h-6 w-6"
-                checked={projects_enabled}
-                onCheckedChange={(c) => setProjects(!!c)}
+                checked={projectsEnabled}
+                onCheckedChange={(c) => setProjectsEnabled(!!c)}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -183,21 +192,15 @@ export function AddCourseModal({ isOpen, onClose, userId, onCreated }: AddCourse
               </span>
               <Checkbox
                 className="h-6 w-6"
-                checked={assignments_enabled}
-                onCheckedChange={(c) => setAssignments(!!c)}
+                checked={assignmentsEnabled}
+                onCheckedChange={(c) => setAssignmentsEnabled(!!c)}
               />
             </div>
           </div>
 
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
-          {/* Submit */}
-          <Button
-            onClick={handleSubmit}
-            disabled={!name || !type || loading}
-          >
+          <Button onClick={handleSubmit} disabled={!name || !type || loading}>
             {loading ? "Creating..." : "Create Course"}
           </Button>
         </Dialog.Panel>

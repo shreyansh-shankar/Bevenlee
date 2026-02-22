@@ -2,63 +2,72 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@supabase/ssr";
-
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { CourseGrid } from "@/components/dashboard/CourseGrid";
-import { getCoursesByUser, Course } from "@/lib/api/course";
 import { EditCourseDialog } from "./EditCourseDialog";
+import { getCoursesByUser, Course } from "@/lib/api/course";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 
 export default function DashboardClient() {
   const router = useRouter();
 
   const [userId, setUserId] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [coursesLoading, setCoursesLoading] = useState(true);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingCourses, setLoadingCourses] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-  );
-
-  // 🔁 reusable fetch
+  /**
+   * Fetch courses for user
+   */
   const fetchCourses = useCallback(async (uid: string) => {
-    setCoursesLoading(true);
+    setLoadingCourses(true);
     try {
       const data = await getCoursesByUser(uid);
       setCourses(data);
-    } catch (err) {
-      console.error("Failed to fetch courses:", err);
+    } catch (error) {
+      console.error("Failed to fetch courses:", error);
     } finally {
-      setCoursesLoading(false);
+      setLoadingCourses(false);
     }
   }, []);
 
-  function handleDeleted(courseId: string) {
-    setCourses(prev => prev.filter(c => c.course_id !== courseId))
-  }
+  /**
+   * Remove deleted course from UI instantly
+   */
+  const handleDeleted = (courseId: string) => {
+    setCourses(prev => prev.filter(c => c.course_id !== courseId));
+  };
 
-  // Get logged in user
+  /**
+   * Load authenticated user
+   */
   useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
+    let isMounted = true;
 
-      if (!data.user) {
+    const init = async () => {
+      const user = await getCurrentUser();
+
+      if (!user) {
         router.replace("/login");
         return;
       }
 
-      setUserId(data.user.id);
-      setLoading(false);
-      fetchCourses(data.user.id);
+      if (!isMounted) return;
+
+      setUserId(user.id);
+      setLoadingUser(false);
+      fetchCourses(user.id);
     };
 
-    getUser();
+    init();
+
+    return () => {
+      isMounted = false;
+    };
   }, [fetchCourses, router]);
 
-  if (loading) {
+  if (loadingUser) {
     return <p className="text-muted-foreground">Loading dashboard...</p>;
   }
 
@@ -69,7 +78,7 @@ export default function DashboardClient() {
         onCourseCreated={() => fetchCourses(userId!)}
       />
 
-      {coursesLoading ? (
+      {loadingCourses ? (
         <p className="text-muted-foreground">Loading courses...</p>
       ) : (
         <CourseGrid
@@ -78,13 +87,14 @@ export default function DashboardClient() {
           onDeleted={handleDeleted}
         />
       )}
+
       {editingCourse && (
         <EditCourseDialog
           course={editingCourse}
           onClose={() => setEditingCourse(null)}
           onSaved={() => {
-            setEditingCourse(null)
-            fetchCourses(userId!)
+            setEditingCourse(null);
+            fetchCourses(userId!);
           }}
         />
       )}
