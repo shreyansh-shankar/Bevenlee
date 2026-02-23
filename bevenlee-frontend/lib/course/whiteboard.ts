@@ -29,10 +29,24 @@ export async function saveWhiteboardToBackend(documentId: string, data: any): Pr
 export async function fetchWhiteboardFromBackend(documentId: string): Promise<any | null> {
   try {
     const res = await fetch(`/api/whiteboard/load?documentId=${documentId}`)
+
+    if (res.status === 403) {
+      const data = await res.json()
+      if (data?.error === "PLAN_UPGRADE_REQUIRED") {
+        throw new Error("PLAN_UPGRADE_REQUIRED")
+      }
+    }
+
     if (!res.ok) return null
+
     const snapshot = await res.json()
     return snapshot ?? null
+
   } catch (err) {
+    if (err instanceof Error && err.message === "PLAN_UPGRADE_REQUIRED") {
+      throw err
+    }
+
     console.error("Error fetching whiteboard:", err)
     return null
   }

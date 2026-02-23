@@ -14,13 +14,24 @@ export default function TopicWhiteboard({ documentId }: Props) {
 
   const handleMount = useCallback((editor: any) => {
     (async () => {
-      let snapshot = await fetchWhiteboardFromBackend(documentId)
+      let snapshot: any | null = null
 
+      try {
+        snapshot = await fetchWhiteboardFromBackend(documentId)
+      } catch (err) {
+        // 🚫 plan restriction → fallback to local mode
+        if (err instanceof Error && err.message === "PLAN_UPGRADE_REQUIRED") {
+          console.log("Cloud whiteboard locked → using local mode")
+        }
+      }
+
+      // fallback to local storage
       if (!snapshot) {
         const saved = localStorage.getItem(`whiteboard-${documentId}`)
         if (saved) {
           try {
             snapshot = JSON.parse(saved)
+
             if (!snapshot?.schema?.schemaVersion) {
               snapshot = null
               localStorage.removeItem(`whiteboard-${documentId}`)
@@ -31,10 +42,14 @@ export default function TopicWhiteboard({ documentId }: Props) {
         }
       }
 
+      // load snapshot if valid
       if (snapshot?.schema?.schemaVersion) {
         try {
           editor.loadSnapshot(snapshot)
-          localStorage.setItem(`whiteboard-${documentId}`, JSON.stringify(snapshot))
+          localStorage.setItem(
+            `whiteboard-${documentId}`,
+            JSON.stringify(snapshot)
+          )
         } catch (err) {
           console.error("Failed to load snapshot into editor:", err)
         }
@@ -43,13 +58,19 @@ export default function TopicWhiteboard({ documentId }: Props) {
       setIsLoading(false)
     })()
 
-    const cleanup = editor.store.listen(() => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(() => {
-        const latest = editor.store.getSnapshot()
-        localStorage.setItem(`whiteboard-${documentId}`, JSON.stringify(latest))
-      }, 500)
-    },
+    // autosave locally
+    const cleanup = editor.store.listen(
+      () => {
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+
+        debounceRef.current = setTimeout(() => {
+          const latest = editor.store.getSnapshot()
+          localStorage.setItem(
+            `whiteboard-${documentId}`,
+            JSON.stringify(latest)
+          )
+        }, 500)
+      },
       { source: "user", scope: "document" }
     )
 
@@ -64,7 +85,9 @@ export default function TopicWhiteboard({ documentId }: Props) {
       {isLoading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="w-8 h-8 border-4 border-muted border-t-foreground rounded-full animate-spin" />
-          <p className="mt-3 text-sm text-muted-foreground">Loading whiteboard...</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Loading whiteboard...
+          </p>
         </div>
       )}
       <Tldraw autoFocus onMount={handleMount} />
