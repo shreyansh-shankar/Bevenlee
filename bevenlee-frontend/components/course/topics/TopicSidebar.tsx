@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { UpgradeModal } from "@/components/subscription/UpgradeModal"
 import {
     Trash2,
     Plus,
@@ -34,7 +35,7 @@ interface Props {
 export default function TopicSidebar({ topicId, courseId }: Props) {
     const router = useRouter()
     const { draft, setDraft, markDirty } = useCourseEditor()
-
+    const [showUpgrade, setShowUpgrade] = useState(false)
     const [editingTopic, setEditingTopic] = useState(false)
     const [editingSubId, setEditingSubId] = useState<string | null>(null)
     const [collapsed, setCollapsed] = useState(false)
@@ -91,20 +92,29 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                 toast({
                     title: "Whiteboard saved",
                     description: "Your changes have been saved successfully.",
-                    variant: "default",
                 })
-            } else {
-                toast({
-                    title: "Save failed",
-                    description: result?.error || "Unknown error occurred.",
-                    variant: "destructive",
-                })
+                return
             }
-        } catch (err) {
-            console.error("Failed to parse whiteboard data:", err)
+            // 👇 handle plan restriction
+            if (result?.error === "PLAN_UPGRADE_REQUIRED") {
+                setShowUpgrade(true)
+                return
+            }
             toast({
                 title: "Save failed",
-                description: "Could not parse whiteboard data.",
+                description: result?.error || "Unknown error occurred.",
+                variant: "destructive",
+            })
+        } catch (err: any) {
+            // 👇 if API threw error instead of returning JSON
+            if (err?.message?.includes("PLAN_UPGRADE_REQUIRED")) {
+                setShowUpgrade(true)
+                return
+            }
+            console.error("Save error:", err)
+            toast({
+                title: "Save failed",
+                description: "Could not save whiteboard.",
                 variant: "destructive",
             })
         } finally {
@@ -281,6 +291,11 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                     {!collapsed && (isSaving ? "Saving..." : "Save Whiteboard")}
                 </Button>
             </div>
+            <UpgradeModal
+                isOpen={showUpgrade}
+                onClose={() => setShowUpgrade(false)}
+                message="Saving whiteboards is a Pro feature. Upgrade to unlock unlimited saves and keep your progress secure."
+            />
         </aside>
     )
 }
