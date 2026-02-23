@@ -74,6 +74,7 @@ export interface DraftAssignment {
 }
 
 export interface DraftCourse {
+  user_id: string;
   course_id: string;
 
   title: string;
@@ -97,9 +98,11 @@ export interface DraftCourse {
 
 
 export function hydrateDraftCourse(
-  data: CourseDetailResponse
+  data: CourseDetailResponse,
+  userId: string
 ): DraftCourse {
   return {
+    user_id: userId,
     course_id: data.course.course_id,
     title: data.course.title,
     purpose: data.course.purpose,

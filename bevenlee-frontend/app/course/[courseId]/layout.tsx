@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { getCourseDetail } from "@/lib/api/course"
 import { CourseEditorProvider } from "@/components/course/editor/CourseEditorProvider"
 import { Navbar } from "@/components/Navbar"
+import { createClient } from "@/lib/supabase/server"
 
 interface Props {
   children: React.ReactNode
@@ -15,8 +16,13 @@ async function LayoutContent({
   const { courseId } = await params
   const data = await getCourseDetail(courseId)
 
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const userId = user?.id ?? null
+
   return (
-    <CourseEditorProvider initialData={data}>
+    <CourseEditorProvider initialData={data} userId={user!.id ?? null}>
       {children}
     </CourseEditorProvider>
   )

@@ -6,9 +6,11 @@ import { DraftCourse, hydrateDraftCourse } from "@/lib/course/draft";
 
 export function CourseEditorProvider({
   initialData,
+  userId,
   children,
 }: {
   initialData: any;
+  userId: string;
   children: React.ReactNode;
 }) {
   const [draft, _setDraft] = useState<DraftCourse | null>(null);
@@ -16,7 +18,7 @@ export function CourseEditorProvider({
 
   useEffect(() => {
     if (!hasHydrated.current && initialData?.course) {
-      _setDraft(hydrateDraftCourse(initialData));
+      _setDraft(hydrateDraftCourse(initialData, userId));
       hasHydrated.current = true;
     }
   }, [initialData]);

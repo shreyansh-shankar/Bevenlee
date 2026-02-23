@@ -217,6 +217,7 @@ export async function getCourseDetail(
   export async function saveCourse(
     courseId: string,
     payload: {
+      user_id: string;
       course_id: string;
       course: {
         title: string;

@@ -19,6 +19,7 @@ import {
 
 export function serializeDraftCourse(draft: DraftCourse) {
   return {
+    user_id: draft.user_id,
     course_id: draft.course_id,
 
     course: {
