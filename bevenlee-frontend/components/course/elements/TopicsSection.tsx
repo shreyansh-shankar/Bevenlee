@@ -16,7 +16,7 @@ export function TopicsSection() {
   const { draft, setDraft, markDirty } = useCourseEditor();
   const topics = draft.topics.filter(t => !t.isDeleted);
   const router = useRouter();
-
+  const [showSaveWarning, setShowSaveWarning] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   function toggleExpanded(id: string) {
@@ -46,21 +46,21 @@ export function TopicsSection() {
       topics: d.topics.map(t =>
         t.id === topicId
           ? {
-              ...t,
-              subtopics: [
-                ...t.subtopics,
-                {
-                  id: `temp_${uuid()}`,
-                  subtopic_id: null,
-                  topic_id: topicId,
-                  title: "New Subtopic",
-                  is_completed: false,
-                  position: t.subtopics.length + 1,
-                  isNew: true,
-                },
-              ],
-              isExpanded: true,
-            }
+            ...t,
+            subtopics: [
+              ...t.subtopics,
+              {
+                id: `temp_${uuid()}`,
+                subtopic_id: null,
+                topic_id: topicId,
+                title: "New Subtopic",
+                is_completed: false,
+                position: t.subtopics.length + 1,
+                isNew: true,
+              },
+            ],
+            isExpanded: true,
+          }
           : t
       ),
     }));
@@ -162,9 +162,15 @@ export function TopicsSection() {
                             className="flex items-center justify-between py-2 px-2 cursor-pointer"
                             onClick={() => {
                               if (editingId) return;
+
+                              // ✅ Already saved topic
                               if (topic.topic_id) {
                                 router.push(`/course/${draft.course_id}/${topic.topic_id}`);
+                                return;
                               }
+
+                              // ❗ New topic (not yet saved)
+                              setShowSaveWarning(true);
                             }}
                           >
                             <div className="flex items-center gap-2">
@@ -247,9 +253,8 @@ export function TopicsSection() {
                                     onChange={e =>
                                       updateSubtopic(topic.id, sub.id, { title: e.target.value })
                                     }
-                                    className={`border-none px-0 py-1 text-sm bg-transparent focus:ring-0 ${
-                                      sub.is_completed ? "line-through text-muted-foreground" : ""
-                                    }`}
+                                    className={`border-none px-0 py-1 text-sm bg-transparent focus:ring-0 ${sub.is_completed ? "line-through text-muted-foreground" : ""
+                                      }`}
                                   />
 
                                   <Button
@@ -282,6 +287,31 @@ export function TopicsSection() {
             )}
           </Droppable>
         </DragDropContext>
+      )}
+      {showSaveWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-background rounded-xl shadow-xl p-6 w-[400px] space-y-4">
+            <h3 className="text-lg font-semibold">Save required</h3>
+            <p className="text-sm text-muted-foreground">
+              Please save your course first before opening this topic.
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setShowSaveWarning(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowSaveWarning(false);
+                  // Optional: scroll to save button
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              >
+                Sure
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </CourseSection>
   );
