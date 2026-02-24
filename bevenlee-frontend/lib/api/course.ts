@@ -210,46 +210,53 @@ export async function getCourseDetail(
   };
 }
 
-  // ─────────────────────────────────────────────
-  // Save / Update full course aggregate
-  // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// Save / Update full course aggregate
+// ─────────────────────────────────────────────
 
-  export async function saveCourse(
-    courseId: string,
-    payload: {
-      user_id: string;
-      course_id: string;
-      course: {
-        title: string;
-        type: string;
-        status: string;
-        priority: string;
-        purpose?: string | null;
-        projects_enabled: boolean;
-        assignments_enabled: boolean;
-      };
-      topics: Topic[];
-      resources: Resource[];
-      projects: Project[];
-      assignments: Assignment[];
-    }
-  ) {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/save/${courseId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      }
-    );
-
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error.detail || "Failed to save course");
-    }
-
-    return res.json();
+export async function saveCourse(
+  courseId: string,
+  payload: {
+    user_id: string;
+    course_id: string;
+    course: {
+      title: string;
+      type: string;
+      status: string;
+      priority: string;
+      purpose?: string | null;
+      projects_enabled: boolean;
+      assignments_enabled: boolean;
+    };
+    topics: Topic[];
+    resources: Resource[];
+    projects: Project[];
+    assignments: Assignment[];
   }
+) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/save/${courseId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+
+    console.log("FULL ERROR:", error);
+
+    throw new APIError(
+      error?.detail?.message || error?.detail || "Failed to save course",
+      res.status,
+      error?.detail?.error
+    );
+  }
+
+  return res.json();
+}

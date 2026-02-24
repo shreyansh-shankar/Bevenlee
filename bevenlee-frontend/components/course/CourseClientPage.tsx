@@ -8,14 +8,15 @@ import { ProjectsSection } from "./elements/ProjectsSection";
 import { AssignmentsSection } from "./elements/AssignmentsSection";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-
+import { UpgradeModal } from "@/components/subscription/UpgradeModal";
 import { useCourseEditor } from "./editor/CourseEditorContext";
-import { saveCourse } from "@/lib/api/course";
+import { saveCourse, APIError } from "@/lib/api/course";
 import { serializeDraftCourse } from "./editor/serialize";
 
 export function CourseClientPage() {
   const { draft, setDraft } = useCourseEditor();
   const [isSaving, setIsSaving] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   async function handleSave() {
     if (isSaving) return; // prevent double click
@@ -34,8 +35,21 @@ export function CourseClientPage() {
         lastSavedAt: new Date().toISOString(),
       }));
     } catch (err) {
-      console.error(err);
-      // optional: toast error
+      if (err instanceof APIError) {
+        // Topic limit → upgrade modal (expected flow)
+        if (err.code === "TOPIC_LIMIT_EXCEEDED") {
+          setShowUpgrade(true);
+          return;
+        }
+
+        // other backend errors
+        alert(err.message);
+        return;
+      }
+
+      // ❗ Only log unexpected errors
+      console.error("Unexpected save error:", err);
+      alert("Something went wrong");
     } finally {
       setIsSaving(false);
     }
@@ -61,8 +75,8 @@ export function CourseClientPage() {
               {isSaving
                 ? "Saving changes…"
                 : draft.lastSavedAt && !draft.isDirty
-                ? "Saved ✓"
-                : "Save changes"}
+                  ? "Saved ✓"
+                  : "Save changes"}
             </Button>
 
             {draft.lastSavedAt && !draft.isDirty && !isSaving && (
@@ -89,6 +103,11 @@ export function CourseClientPage() {
           {draft.projects_enabled && <ProjectsSection />}
         </div>
       </div>
+      <UpgradeModal
+        isOpen={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        message="You’ve reached the topics limit for your current plan. Upgrade to create more topics."
+      />
     </CourseLayout>
   );
 }
