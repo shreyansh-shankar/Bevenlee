@@ -1,3 +1,5 @@
+import { getSubscription } from "@/lib/billing";
+
 export interface UserProfileResponse {
   name: string;
   email: string;
@@ -20,6 +22,8 @@ export async function getUserProfile(
     { cache: "no-store" }
   );
 
+  const subscription = await getSubscription(userId);
+
   if (!res.ok) {
     throw new Error("Failed to fetch profile");
   }
@@ -35,10 +39,10 @@ export async function getUserProfile(
     created_at: profile.created_at,
 
     subscription: {
-      plan_name: "Free Plan",
-      status: "active",
-      courses_used: 0,
-      courses_limit: 7,
+      plan_name: subscription.plan_name,
+      status: subscription.is_active ? "active" : "inactive",
+      courses_used: 0,        // keep as-is, you track this elsewhere
+      courses_limit: 7,       // your normalizeSubscription handles this
     },
   };
 }
