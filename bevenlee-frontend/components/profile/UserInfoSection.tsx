@@ -4,6 +4,7 @@ import { useState } from "react";
 import AvatarPicker from "./AvatarPicker";
 import type { UserProfile } from "@/lib/types/user";
 import { Button } from "../ui/button";
+import { updateUserProfile } from "@/lib/profile/getUserProfile";
 
 interface Props {
   user: UserProfile;
@@ -11,6 +12,24 @@ interface Props {
 
 export default function UserInfoSection({ user }: Props) {
   const [name, setName] = useState(user.name);
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    try {
+      setSaving(true);
+
+      await updateUserProfile(user.id, name);
+
+      // update original value to prevent button staying enabled
+      user.name = name;
+
+    } catch (err) {
+      console.error("Update failed", err);
+      alert("Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <section className="rounded-2xl border bg-card p-6 shadow-sm">
@@ -22,6 +41,7 @@ export default function UserInfoSection({ user }: Props) {
       </div>
 
       <div className="flex items-center gap-6">
+        {/* avatar UI stays */}
         <AvatarPicker
           name={name}
           avatarUrl={user.avatar_url}
@@ -39,10 +59,11 @@ export default function UserInfoSection({ user }: Props) {
           </div>
 
           <Button
-            className="text-sm font-medium hover: disabled:opacity-50"
-            disabled={name === user.name}
+            onClick={handleSave}
+            disabled={saving || name === user.name}
+            className="text-sm font-medium hover:disabled:opacity-50"
           >
-            Save changes
+            {saving ? "Saving..." : "Save changes"}
           </Button>
         </div>
       </div>
