@@ -1,4 +1,13 @@
 import { getSubscription } from "@/lib/billing";
+import { getAuthToken } from "@/lib/auth/getAuthToken"
+
+async function authHeaders(token?: string): Promise<HeadersInit> {
+  const t = token ?? await getAuthToken()  // use passed token or get from browser
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${t}`,
+  }
+}
 
 export interface UserProfileResponse {
   name: string;
@@ -15,11 +24,15 @@ export interface UserProfileResponse {
 }
 
 export async function getUserProfile(
-  userId: string
+  userId: string,
+  token?: string
 ): Promise<UserProfileResponse> {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/profile/${userId}`,
-    { cache: "no-store" }
+    { 
+      cache: "no-store",
+      headers: await authHeaders(token)
+    }
   );
 
   const subscription = await getSubscription(userId);
@@ -49,15 +62,14 @@ export async function getUserProfile(
 
 export async function updateUserProfile(
   userId: string,
-  fullName: string
+  fullName: string,
+  token?: string
 ): Promise<void> {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`,
     {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: await authHeaders(token),
       body: JSON.stringify({
         user_id: userId,
         full_name: fullName,

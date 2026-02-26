@@ -1,3 +1,5 @@
+import { getAuthToken } from "@/lib/auth/getAuthToken"
+
 export interface CreateCoursePayload {
   user_id: string
   title: string
@@ -90,14 +92,20 @@ export class APIError extends Error {
   }
 }
 
+async function authHeaders(): Promise<HeadersInit> {
+  const token = await getAuthToken()
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+  }
+}
+
 export async function createCourse(payload: CreateCoursePayload) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/course`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: await authHeaders(),
       body: JSON.stringify(payload),
     }
   )
@@ -120,9 +128,7 @@ export async function getCoursesByUser(userId: string): Promise<Course[]> {
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/${userId}`,
     {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: await authHeaders(),
       cache: "no-store",
     }
   )
@@ -155,9 +161,7 @@ export async function updateCourseMetadata(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/${courseId}`,
     {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: await authHeaders(),
       body: JSON.stringify(updates),
     }
   )
@@ -175,6 +179,7 @@ export async function deleteCourse(courseId: string) {
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/${courseId}`,
     {
       method: "DELETE",
+      headers: await authHeaders(),
     }
   )
 
@@ -187,11 +192,19 @@ export async function deleteCourse(courseId: string) {
 }
 
 export async function getCourseDetail(
-  courseId: string
+  courseId: string,
+  access_token: string
 ): Promise<CourseDetailResponse> {
+  const headers = access_token
+    ? { "Authorization": `Bearer ${access_token}` }  // server call — token passed in
+    : await authHeaders()
+
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/detail/${courseId}`,
-    { cache: "no-store" }
+    { 
+      cache: "no-store",
+      headers
+    }
   );
 
   if (!res.ok) {
@@ -238,9 +251,7 @@ export async function saveCourse(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/save/${courseId}`,
     {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: await authHeaders(),
       credentials: "include",
       body: JSON.stringify(payload),
     }

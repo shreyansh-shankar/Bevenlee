@@ -1,11 +1,19 @@
+import { getAuthToken } from "@/lib/auth/getAuthToken"
+
+async function authHeaders(): Promise<HeadersInit> {
+  const token = await getAuthToken()
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+  }
+}
+
 export async function fetchUserPlan(userId: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: await authHeaders(),
       body: JSON.stringify({ user_id: userId }),
     }
   )

@@ -3,6 +3,7 @@ import { getCourseDetail } from "@/lib/api/course"
 import { CourseEditorProvider } from "@/components/course/editor/CourseEditorProvider"
 import { Navbar } from "@/components/Navbar"
 import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 
 interface Props {
   children: React.ReactNode
@@ -14,10 +15,16 @@ async function LayoutContent({
   params,
 }: Props) {
   const { courseId } = await params
-  const data = await getCourseDetail(courseId)
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
+
+  if (!user || !session) {
+    redirect("/auth/login")
+  }
+
+  const data = await getCourseDetail(courseId, session.access_token)
 
   const userId = user?.id ?? null
 

@@ -2,29 +2,24 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import UserInfoSection from "@/components/profile/UserInfoSection";
 import BillingSection from "@/components/profile/BillingSection";
 import AccountInfoSection from "@/components/profile/AccountInfoSection";
-
 import { getUserProfile } from "@/lib/profile/getUserProfile";
 import {
   normalizeSubscription,
   normalizeAccountInfo,
 } from "@/lib/profile/normalizeProfile";
-
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function ProfileContent() {
   const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (!session?.user) redirect("/auth/login");
 
-  if (!user) redirect("/auth/login");
-
-  const profile = await getUserProfile(user.id);
+  const profile = await getUserProfile(session.user.id, session.access_token);
 
   const userInfo = {
-    id: user.id,
+    id: session.user.id,
     name: profile.name,
     email: profile.email,
     avatar_url: profile.avatar_url,
