@@ -5,9 +5,11 @@ export interface Subscription {
   plan_name: string;
   plan_started_at: string | null;
   plan_expires_at: string | null;
+  subscription_status: "free" | "active" | "cancelled";
   creem_customer_id: string | null;
   creem_subscription_id: string | null;
   is_active: boolean;
+  cancels_at_period_end: boolean;
   days_remaining: number | null;
 }
 
@@ -73,4 +75,23 @@ export async function cancelSubscription(
     }),
   });
   if (!res.ok) throw new Error("Failed to cancel subscription");
+}
+
+export async function upgradeSubscription(
+  userId: string,
+  subscriptionId: string,
+  planId: number,
+  billingCycle: "monthly" | "yearly"
+): Promise<void> {
+  const res = await fetch(`${BACKEND}/billing/upgrade`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      subscription_id: subscriptionId,
+      plan_id: planId,
+      billing_cycle: billingCycle,
+    }),
+  });
+  if (!res.ok) throw new Error("Failed to upgrade subscription");
 }
