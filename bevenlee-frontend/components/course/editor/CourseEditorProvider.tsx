@@ -7,10 +7,12 @@ import { DraftCourse, hydrateDraftCourse } from "@/lib/course/draft";
 export function CourseEditorProvider({
   initialData,
   userId,
+  isPro,
   children,
 }: {
   initialData: any;
   userId: string;
+  isPro: boolean;
   children: React.ReactNode;
 }) {
   const [draft, _setDraft] = useState<DraftCourse | null>(null);
@@ -44,7 +46,7 @@ export function CourseEditorProvider({
 
   return (
     <CourseEditorContext.Provider
-      value={{ draft, setDraft, markDirty }}
+      value={{ draft, setDraft, markDirty, isPro }}
     >
       {children}
     </CourseEditorContext.Provider>

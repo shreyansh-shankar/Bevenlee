@@ -6,8 +6,8 @@ import { DraftCourse } from "@/lib/course/draft";
 interface CourseEditorContextValue {
   draft: DraftCourse;
   setDraft: React.Dispatch<React.SetStateAction<DraftCourse>>;
-
   markDirty: () => void;
+  isPro: boolean;
 }
 
 export const CourseEditorContext =

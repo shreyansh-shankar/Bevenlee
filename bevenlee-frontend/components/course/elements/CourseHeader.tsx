@@ -12,11 +12,11 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EditableField } from "../../ui/EditableField";
-
+import { ShareButton } from "@/components/course/share/ShareButton";
 import { useCourseEditor } from "../editor/CourseEditorContext";
 
 export function CourseHeader() {
-  const { draft, setDraft, markDirty } = useCourseEditor();
+  const { draft, setDraft, markDirty, isPro } = useCourseEditor();
 
   const update = (patch: Partial<typeof draft>) => {
     setDraft(d => ({
@@ -30,32 +30,41 @@ export function CourseHeader() {
 
   return (
     <div className="flex flex-col gap-6 pb-8">
-      {/* ───────── TITLE + META ───────── */}
+      {/* ───────── TITLE + SHARE ───────── */}
       <div className="flex flex-col gap-4 max-w-5xl">
-        {/* TITLE */}
-        <EditableField
-          value={draft.title}
-          onChange={(v) => update({ title: v })}
-          className="text-3xl font-semibold tracking-tight"
-        >
-          {({ value, onChange, onBlur }) => (
-            <Input
-              autoFocus
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onBlur={onBlur}
-              className="
-                text-3xl font-semibold
-                px-3 py-2
-                rounded-lg
-                border border-transparent
-                focus-visible:border-border
-                focus-visible:bg-muted/40
-                focus-visible:ring-0
-              "
-            />
-          )}
-        </EditableField>
+        <div className="flex items-start justify-between gap-4">
+          {/* TITLE */}
+          <div className="flex-1">
+            <EditableField
+              value={draft.title}
+              onChange={(v) => update({ title: v })}
+              className="text-3xl font-semibold tracking-tight"
+            >
+              {({ value, onChange, onBlur }) => (
+                <Input
+                  autoFocus
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                  className="
+                    text-3xl font-semibold
+                    px-3 py-2
+                    rounded-lg
+                    border border-transparent
+                    focus-visible:border-border
+                    focus-visible:bg-muted/40
+                    focus-visible:ring-0
+                  "
+                />
+              )}
+            </EditableField>
+          </div>
+
+          {/* SHARE */}
+          <div className="shrink-0 pt-1">
+            <ShareButton courseId={draft.course_id} isPro={isPro} />
+          </div>
+        </div>
 
         {/* META ROW */}
         <div className="flex items-center gap-6 text-sm text-muted-foreground">
@@ -152,9 +161,7 @@ export function CourseHeader() {
         <label className="flex items-center gap-2">
           <Switch
             checked={draft.projects_enabled}
-            onCheckedChange={(v) =>
-              update({ projects_enabled: v })
-            }
+            onCheckedChange={(v) => update({ projects_enabled: v })}
           />
           Projects
         </label>
@@ -162,9 +169,7 @@ export function CourseHeader() {
         <label className="flex items-center gap-2">
           <Switch
             checked={draft.assignments_enabled}
-            onCheckedChange={(v) =>
-              update({ assignments_enabled: v })
-            }
+            onCheckedChange={(v) => update({ assignments_enabled: v })}
           />
           Assignments
         </label>
