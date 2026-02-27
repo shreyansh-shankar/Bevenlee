@@ -12,7 +12,7 @@ export function Navbar() {
           href="/dashboard"
           className="font-semibold text-sm tracking-tight hover:opacity-80 transition"
         >
-          APP-NAME
+          BEVENLEE
         </Link>
 
         {/* Actions */}

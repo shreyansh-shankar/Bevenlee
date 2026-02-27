@@ -63,7 +63,7 @@ export function useStudySession({ topicId }: UseStudySessionOptions) {
       setIsSaving(false)
 
       if (result.success) {
-        // Optimistically update stats
+        // Optimistically update stats — use captured `startedAt`, not the cleared ref
         setStats((prev) => {
           if (!prev) return prev
           return {
@@ -74,7 +74,7 @@ export function useStudySession({ topicId }: UseStudySessionOptions) {
               ...prev.sessions,
               {
                 topic_id: topicId,
-                started_at: startedAtRef.current!.toISOString(),
+                started_at: startedAt.toISOString(), // ✅ use local var, ref is already null
                 duration_minutes: durationMinutes,
               },
             ],
@@ -101,14 +101,19 @@ export function useStudySession({ topicId }: UseStudySessionOptions) {
     [isRunning, elapsedSeconds, topicId]
   )
 
+  // Keep a ref to the latest stopAndSave so the unmount cleanup
+  // always calls the version with up-to-date isRunning + elapsedSeconds
+  const stopAndSaveRef = useRef(stopAndSave)
+  useEffect(() => {
+    stopAndSaveRef.current = stopAndSave
+  }, [stopAndSave])
+
   // Auto-stop on page close / tab close
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (isRunning && startedAtRef.current) {
         const durationMinutes = Math.floor(elapsedSeconds / 60)
         if (durationMinutes >= 1) {
-          // Use sendBeacon for reliability on page unload
-          const token = "" // sendBeacon can't set auth headers easily; handled server-side via cookie
           navigator.sendBeacon(
             "/api/sessions/save",
             JSON.stringify({
@@ -125,13 +130,11 @@ export function useStudySession({ topicId }: UseStudySessionOptions) {
   }, [isRunning, elapsedSeconds, topicId])
 
   // Auto-stop on component unmount (navigate away within app)
+  // Empty dep array is safe here because we access stopAndSave via ref
   useEffect(() => {
     return () => {
-      if (isRunning && startedAtRef.current) {
-        stopAndSave(true)
-      }
+      stopAndSaveRef.current(true)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function start() {
