@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { UpgradeModal } from "@/components/subscription/UpgradeModal"
+import StudySession from "@/components/course/topics/StudySession"
 import {
     Trash2,
     Plus,
@@ -184,7 +185,7 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
 
                     {/* SUBTOPICS LIST - limited height to 50% of viewport */}
                     <div className="flex flex-col">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-2 mt-2">
                             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                                 Subtopics
                             </span>
@@ -199,7 +200,7 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                             </Button>
                         </div>
 
-                        <ScrollArea className="h-[62.5vh]">
+                        <ScrollArea className="h-[45vh]">
                             <div className="flex flex-col space-y-1">
                                 {visibleSubtopics.map(sub => (
                                     <div
@@ -258,8 +259,9 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                             </div>
                         </ScrollArea>
 
+
                         {/* SAVE BUTTON BELOW SUBTOPICS */}
-                        <div className="mt-4">
+                        <div className="mt-4 mb-4">
                             <Button
                                 size="sm"
                                 variant="outline"
@@ -270,11 +272,13 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                                 {isSaving ? "Saving Whiteboard..." : "Save Whiteboard"}
                             </Button>
                         </div>
+                        {/* STUDY SESSION */}
+                        <StudySession topicId={topicId} />
                     </div>
                 </div>
             )}
             {/* SAVE BUTTON ALWAYS VISIBLE */}
-            <div className="px-2 mx-auto mt-[73.5vh]">
+            <div className="px-2 mx-auto mt-[60vh]">
                 <Button
                     size="sm"
                     variant="outline"

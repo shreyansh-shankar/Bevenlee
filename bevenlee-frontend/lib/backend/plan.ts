@@ -1,7 +1,7 @@
-import { getAuthToken } from "@/lib/auth/getAuthToken"
+import { getAuthTokenServer } from "@/lib/auth/getAuthToken.server"
 
 async function authHeaders(): Promise<HeadersInit> {
-  const token = await getAuthToken()
+  const token = await getAuthTokenServer()
   return {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${token}`,
@@ -17,10 +17,8 @@ export async function fetchUserPlan(userId: string) {
       body: JSON.stringify({ user_id: userId }),
     }
   )
-
   if (!res.ok) {
     throw new Error("Failed to fetch user plan")
   }
-
   return res.json()
 }
