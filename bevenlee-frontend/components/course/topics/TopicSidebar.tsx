@@ -96,7 +96,6 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                 })
                 return
             }
-            // 👇 handle plan restriction
             if (result?.error === "PLAN_UPGRADE_REQUIRED") {
                 setShowUpgrade(true)
                 return
@@ -107,7 +106,6 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                 variant: "destructive",
             })
         } catch (err: any) {
-            // 👇 if API threw error instead of returning JSON
             if (err?.message?.includes("PLAN_UPGRADE_REQUIRED")) {
                 setShowUpgrade(true)
                 return
@@ -122,7 +120,6 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
             setIsSaving(false);
         }
     }
-
 
     const visibleSubtopics = currentTopic.subtopics.filter(s => !s.isDeleted)
 
@@ -158,7 +155,7 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
 
             {/* ONLY SHOW CONTENT WHEN NOT COLLAPSED */}
             {!collapsed && (
-                <div className="flex flex-col flex-1 px-4 py-2">
+                <div className="flex flex-col flex-1 px-4 py-2 overflow-hidden">
                     {/* TOPIC TITLE */}
                     <div className="p-4 border-b">
                         {editingTopic ? (
@@ -183,8 +180,8 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                         )}
                     </div>
 
-                    {/* SUBTOPICS LIST - limited height to 50% of viewport */}
-                    <div className="flex flex-col">
+                    {/* SUBTOPICS LIST */}
+                    <div className="flex flex-col min-h-0">
                         <div className="flex items-center justify-between mb-2 mt-2">
                             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                                 Subtopics
@@ -259,9 +256,8 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                             </div>
                         </ScrollArea>
 
-
                         {/* SAVE BUTTON BELOW SUBTOPICS */}
-                        <div className="mt-4 mb-4">
+                        <div className="mt-4 mb-2">
                             <Button
                                 size="sm"
                                 variant="outline"
@@ -272,17 +268,31 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                                 {isSaving ? "Saving Whiteboard..." : "Save Whiteboard"}
                             </Button>
                         </div>
-                        {/* STUDY SESSION */}
-                        <StudySession topicId={topicId} />
                     </div>
                 </div>
             )}
-            {/* SAVE BUTTON ALWAYS VISIBLE */}
-            <div className="px-2 mx-auto mt-[60vh]">
+
+            {/*
+              STUDY SESSION — always mounted outside the collapsed block.
+              Using CSS visibility (hidden/visible + h-0/auto) keeps the component
+              in the React tree so the timer and hook state are never destroyed.
+            */}
+            <div
+                className={
+                    collapsed
+                        ? "invisible h-0 overflow-hidden"
+                        : "px-4 pb-3"
+                }
+            >
+                <StudySession topicId={topicId} />
+            </div>
+
+            {/* SAVE BUTTON ALWAYS VISIBLE (icon-only when collapsed) */}
+            <div className="px-2 mx-auto mt-auto pb-4 pt-2 w-full">
                 <Button
                     size="sm"
                     variant="outline"
-                    className={`flex items-center justify-center gap-2 w-full ${collapsed ? "w-10 h-10 p-2" : ""
+                    className={`flex items-center justify-center gap-2 w-full ${collapsed ? "w-10 h-10 p-2 mx-auto" : ""
                         }`}
                     onClick={handleSave}
                     title={collapsed ? "Save Whiteboard" : undefined}
@@ -295,6 +305,7 @@ export default function TopicSidebar({ topicId, courseId }: Props) {
                     {!collapsed && (isSaving ? "Saving..." : "Save Whiteboard")}
                 </Button>
             </div>
+
             <UpgradeModal
                 isOpen={showUpgrade}
                 onClose={() => setShowUpgrade(false)}
