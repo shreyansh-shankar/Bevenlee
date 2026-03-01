@@ -123,12 +123,17 @@ export async function createCourse(payload: CreateCoursePayload) {
   return data
 }
 
-export async function getCoursesByUser(userId: string): Promise<Course[]> {
+export async function getCoursesByUser(userId: string, accessToken?: string): Promise<Course[]> {
+  
+  const headers = accessToken
+    ? { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" }
+    : await authHeaders()
+  
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/${userId}`,
     {
       method: "GET",
-      headers: await authHeaders(),
+      headers,
       cache: "no-store",
     }
   )

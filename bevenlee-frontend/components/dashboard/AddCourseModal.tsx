@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { X } from "lucide-react";
-import { APIError } from "@/lib/api/course";
+import { APIError, Course } from "@/lib/api/course";
 import { UpgradeModal } from "@/components/subscription/UpgradeModal";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,7 +21,7 @@ interface AddCourseModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
-  onCreated: () => void;
+  onCreated: (course: Course) => void;
 }
 
 export function AddCourseModal({
@@ -61,7 +61,7 @@ export function AddCourseModal({
     setError(null);
 
     try {
-      await createCourseAction({
+      const data = await createCourseAction({
         userId,
         title: name,
         purpose: purpose || undefined,
@@ -73,7 +73,7 @@ export function AddCourseModal({
       });
 
       resetForm();
-      onCreated();
+      onCreated(data.course);
       onClose();
 
     } catch (err: unknown) {
@@ -217,7 +217,7 @@ export function AddCourseModal({
         <UpgradeModal
           isOpen={showUpgrade}
           onClose={() => setShowUpgrade(false)}
-          message="You’ve reached the course limit for your current plan. Upgrade to create more courses."
+          message="You've reached the course limit for your current plan. Upgrade to create more courses."
         />
       </div>
     </Dialog>

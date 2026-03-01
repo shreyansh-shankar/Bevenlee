@@ -35,7 +35,10 @@ export function DashboardHeader({ userId, onCourseCreated }: DashboardHeaderProp
         isOpen={open}
         onClose={() => setOpen(false)}
         userId={userId}
-        onCreated={onCourseCreated}
+        onCreated={() => {
+          onCourseCreated();
+          setOpen(false);
+        }}
       />
     </>
   );
