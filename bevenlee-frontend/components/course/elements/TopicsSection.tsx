@@ -4,7 +4,7 @@ import { v4 as uuid } from "uuid";
 import { CourseSection } from "../CourseSection";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, GripVertical, ChevronDown, ChevronRight, Pencil } from "lucide-react";
+import { Trash2, Plus, GripVertical, ChevronDown, ChevronRight, Pencil, CheckCircle2, Circle } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,6 +26,17 @@ export function TopicsSection() {
         t.id === id ? { ...t, isExpanded: !t.isExpanded } : t
       ),
     }));
+  }
+
+  function toggleTopicCompleted(id: string, currentStatus: string) {
+    const newStatus = currentStatus === "completed" ? "Not Started" : "completed";
+    setDraft(d => ({
+      ...d,
+      topics: d.topics.map(t =>
+        t.id === id ? { ...t, status: newStatus } : t
+      ),
+    }));
+    markDirty();
   }
 
   function updateSubtopic(topicId: string, subId: string, patch: Partial<DraftSubtopic>) {
@@ -148,6 +159,7 @@ export function TopicsSection() {
                 {topics.map((topic, index) => {
                   const subs = topic.subtopics.filter(s => !s.isDeleted);
                   const completed = subs.filter(s => s.is_completed).length;
+                  const isCompleted = topic.status === "completed";
 
                   return (
                     <Draggable key={topic.id} draggableId={topic.id} index={index}>
@@ -163,13 +175,11 @@ export function TopicsSection() {
                             onClick={() => {
                               if (editingId) return;
 
-                              // ✅ Already saved topic
                               if (topic.topic_id) {
                                 router.push(`/course/${draft.course_id}/${topic.topic_id}`);
                                 return;
                               }
 
-                              // ❗ New topic (not yet saved)
                               setShowSaveWarning(true);
                             }}
                           >
@@ -177,6 +187,22 @@ export function TopicsSection() {
                               <div {...provided.dragHandleProps} className="cursor-grab">
                                 <GripVertical className="h-4 w-4 text-gray-400" />
                               </div>
+
+                              {/* Completion toggle */}
+                              <button
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  toggleTopicCompleted(topic.id, topic.status);
+                                }}
+                                className="shrink-0 transition-colors"
+                                title={isCompleted ? "Mark as not completed" : "Mark as completed"}
+                              >
+                                {isCompleted ? (
+                                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                                ) : (
+                                  <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                                )}
+                              </button>
 
                               <button
                                 onClick={e => {
@@ -203,11 +229,13 @@ export function TopicsSection() {
                                   className="border-none px-0 py-1 text-sm font-medium bg-transparent focus:ring-0"
                                 />
                               ) : (
-                                <span className="font-medium">{topic.title}</span>
+                                <span className={`font-medium ${isCompleted ? "line-through text-muted-foreground" : ""}`}>
+                                  {topic.title}
+                                </span>
                               )}
 
                               <p className="text-xs text-muted-foreground">
-                                {completed}/{subs.length} completed
+                                {subs.length > 0 ? `${completed}/${subs.length} subtopics` : isCompleted ? "Completed" : "Not started"}
                               </p>
                             </div>
 
@@ -253,8 +281,7 @@ export function TopicsSection() {
                                     onChange={e =>
                                       updateSubtopic(topic.id, sub.id, { title: e.target.value })
                                     }
-                                    className={`border-none px-0 py-1 text-sm bg-transparent focus:ring-0 ${sub.is_completed ? "line-through text-muted-foreground" : ""
-                                      }`}
+                                    className={`border-none px-0 py-1 text-sm bg-transparent focus:ring-0 ${sub.is_completed ? "line-through text-muted-foreground" : ""}`}
                                   />
 
                                   <Button
@@ -303,7 +330,6 @@ export function TopicsSection() {
               <Button
                 onClick={() => {
                   setShowSaveWarning(false);
-                  // Optional: scroll to save button
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               >
