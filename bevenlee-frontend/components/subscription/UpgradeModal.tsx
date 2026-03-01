@@ -39,7 +39,7 @@ export function UpgradeModal({
           </p>
 
           <div className="flex flex-col gap-2 pt-2">
-            <Button onClick={() => window.location.href = "/pricing"}>
+            <Button onClick={() => window.location.href = "/billing"}>
               Upgrade Plan
             </Button>
 

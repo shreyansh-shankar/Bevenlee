@@ -1,8 +1,9 @@
 "use client";
-
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Map } from "lucide-react";
 import { AddCourseModal } from "./AddCourseModal";
+import { useRouter } from "next/navigation";
+import { Course } from "@/lib/api/course";
 
 interface DashboardHeaderProps {
   userId: string;
@@ -11,6 +12,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ userId, onCourseCreated }: DashboardHeaderProps) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <>
@@ -21,21 +23,28 @@ export function DashboardHeader({ userId, onCourseCreated }: DashboardHeaderProp
             Track your learning progress across all courses
           </p>
         </div>
-
-        <button
-          className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 transition"
-          onClick={() => setOpen(true)}
-        >
-          <Plus size={16} />
-          Add New Course
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.push("/roadmaps")}
+            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted/40 transition"
+          >
+            <Map size={16} />
+            Roadmaps
+          </button>
+          <button
+            className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 transition"
+            onClick={() => setOpen(true)}
+          >
+            <Plus size={16} />
+            Add New Course
+          </button>
+        </div>
       </div>
-
       <AddCourseModal
         isOpen={open}
         onClose={() => setOpen(false)}
         userId={userId}
-        onCreated={() => {
+        onCreated={(course: Course) => {
           onCourseCreated();
           setOpen(false);
         }}
@@ -43,4 +52,3 @@ export function DashboardHeader({ userId, onCourseCreated }: DashboardHeaderProp
     </>
   );
 }
-

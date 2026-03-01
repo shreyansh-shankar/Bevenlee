@@ -5,6 +5,7 @@ import { getRoadmapDetail } from "@/lib/api/roadmap"
 import { getCoursesByUser } from "@/lib/api/course"
 import { RoadmapEditorProvider } from "@/components/roadmap/RoadmapEditorProvider"
 import { Navbar } from "@/components/Navbar"
+import { fetchUserPlan } from "@/lib/backend/plan"
 
 interface Props {
   children: React.ReactNode
@@ -20,6 +21,9 @@ async function LayoutContent({ children, params }: Props) {
 
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) redirect("/auth/login")
+
+  const planData = await fetchUserPlan(user.id)
+  if (planData.plan.id < 1) redirect("/upgrade")
 
   const [detail, userCourses] = await Promise.all([
     getRoadmapDetail(roadmapId, session.access_token),

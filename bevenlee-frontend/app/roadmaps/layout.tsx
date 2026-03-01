@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { getRoadmapsByUser } from "@/lib/api/roadmap"
 import { RoadmapsProvider } from "@/components/roadmaps/RoadmapsProvider"
 import { Navbar } from "@/components/Navbar"
+import { fetchUserPlan } from "@/lib/backend/plan"
 
 interface Props {
   children: React.ReactNode
@@ -17,6 +18,9 @@ async function LayoutContent({ children }: Props) {
 
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) redirect("/auth/login")
+
+  const planData = await fetchUserPlan(user.id)
+  if (planData.plan.id < 1) redirect("/upgrade")
 
   const roadmaps = await getRoadmapsByUser(user.id, session.access_token)
 
