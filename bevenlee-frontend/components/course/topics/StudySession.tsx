@@ -88,7 +88,7 @@ export default function StudySession({ topicId }: Props) {
             <span className="text-xs font-medium">
               {isLoadingStats ? "—" : formatMinutes(stats?.today_minutes ?? 0)}
             </span>
-            <span className="text-[10px] text-muted-foreground leading-none">Today</span>
+            <span className="text-[10px] text-muted-foreground leading-none">Total</span>
           </div>
 
           {/* Sessions */}
