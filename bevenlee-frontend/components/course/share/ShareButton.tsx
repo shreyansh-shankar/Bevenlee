@@ -34,6 +34,7 @@ export function ShareButton({ courseId, isPro }: Props) {
   const [isCreating, setIsCreating] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
+  const [whiteboards, setWhiteboards] = useState(false)
 
   async function handleCreate() {
     if (!isPro) {
@@ -43,7 +44,7 @@ export function ShareButton({ courseId, isPro }: Props) {
 
     setIsCreating(true)
     try {
-      const link = await createShareLink(courseId, expiry)
+      const link = await createShareLink(courseId, expiry, whiteboards)
       setShareLink(link)
     } catch (err: any) {
       toast({
@@ -71,6 +72,7 @@ export function ShareButton({ courseId, isPro }: Props) {
       setShareLink(null)
       setExpiry("never")
       setCopied(false)
+      setWhiteboards(false)
     }
   }
 
@@ -119,6 +121,29 @@ export function ShareButton({ courseId, isPro }: Props) {
                       <SelectItem value="30d">Expires in 30 days</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* Whiteboard sharing toggle */}
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-sm font-medium">Include whiteboards</label>
+                    <span className="text-xs text-muted-foreground">
+                      Recipients will receive a copy of your whiteboard notes
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={whiteboards}
+                    onClick={() => setWhiteboards((v) => !v)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors
+          ${whiteboards ? "bg-primary" : "bg-input"}`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-background shadow-lg transform transition-transform
+            ${whiteboards ? "translate-x-5" : "translate-x-0"}`}
+                    />
+                  </button>
                 </div>
 
                 <Button onClick={handleCreate} disabled={isCreating}>

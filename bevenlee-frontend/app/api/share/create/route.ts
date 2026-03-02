@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { course_id, expiry } = body
+    const { course_id, expiry, whiteboards = false } = body
 
     if (!course_id || !expiry) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 })
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
         user_id: user.id,
         course_id,
         expiry,
+        whiteboards,
       }),
     })
 
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
       token: data.token,
       url: `${baseUrl}/share/${data.token}`,
       expires_at: data.expires_at,
+      whiteboards: data.whiteboards,
     })
   } catch (err) {
     console.error("Error creating share link:", err)

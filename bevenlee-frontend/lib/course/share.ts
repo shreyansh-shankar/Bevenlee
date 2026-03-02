@@ -6,6 +6,7 @@ export interface ShareLink {
   token: string
   url: string
   expires_at: string | null
+  whiteboards: boolean
 }
 
 export interface SharePreview {
@@ -17,6 +18,7 @@ export interface SharePreview {
   created_by_name: string
   expires_at: string | null
   is_expired: boolean
+  whiteboards: boolean
 }
 
 export interface AcceptShareResult {
@@ -36,12 +38,13 @@ async function authHeaders(): Promise<HeadersInit> {
 
 export async function createShareLink(
   courseId: string,
-  expiry: ShareExpiry
+  expiry: ShareExpiry,
+  whiteboards: boolean = false
 ): Promise<ShareLink> {
   const res = await fetch("/api/share/create", {
     method: "POST",
     headers: await authHeaders(),
-    body: JSON.stringify({ course_id: courseId, expiry }),
+    body: JSON.stringify({ course_id: courseId, expiry, whiteboards }),
   })
 
   if (!res.ok) {
