@@ -5,9 +5,10 @@ import { RoadmapViewMode } from "./RoadmapViewMode"
 import { RoadmapEditMode } from "./RoadmapEditMode"
 import { Pencil, X, Save, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { RoadmapShareButton } from "./share/RoadmapShareButton"
 
 export function RoadmapClientPage() {
-  const { title, description, mode, setMode, isDirty, isSaving, save } = useRoadmapEditor()
+  const { title, description, mode, setMode, isDirty, isSaving, save, roadmapId } = useRoadmapEditor()
 
   async function handleSave() {
     await save()
@@ -52,14 +53,17 @@ export function RoadmapClientPage() {
               </Button>
             </>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setMode("edit")}
-            >
-              <Pencil size={14} className="mr-1.5" />
-              Edit
-            </Button>
+            <>
+              <RoadmapShareButton roadmapId={roadmapId} />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setMode("edit")}
+              >
+                <Pencil size={14} className="mr-1.5" />
+                Edit
+              </Button>
+            </>
           )}
         </div>
       </div>
