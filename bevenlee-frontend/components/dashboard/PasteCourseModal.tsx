@@ -2,13 +2,14 @@
 
 import { Dialog } from "@headlessui/react";
 import {
-  X, ClipboardPaste, ChevronRight,
+  X, ClipboardPaste, ChevronRight, Link,
   AlertCircle, CheckCircle2, Loader2, RotateCcw,
+  FolderOpen, BookOpen,
 } from "lucide-react";
 import { Course } from "@/lib/api/course";
 import { UpgradeModal } from "@/components/subscription/UpgradeModal";
 import { usePasteCourse } from "@/lib/backend/usePasteCourse";
-import { FORMAT_TEMPLATE } from "@/lib/backend/parseCourseFormat";
+import { FORMAT_TEMPLATE, ParsedCourse } from "@/lib/backend/parseCourseFormat";
 
 interface PasteCourseModalProps {
   isOpen: boolean;
@@ -39,7 +40,6 @@ export function PasteCourseModal({
 
   return (
     <Dialog open={isOpen} onClose={handleClose} className="relative z-50">
-      {/* Backdrop */}
       <div className="fixed inset-0 bg-black/40 backdrop-blur-md" />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -63,7 +63,6 @@ export function PasteCourseModal({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* Step dots */}
               <div className="hidden sm:flex items-center gap-1.5 mr-3">
                 {(["paste", "preview"] as const).map((s, i) => (
                   <div
@@ -93,7 +92,6 @@ export function PasteCourseModal({
             {/* PASTE STEP */}
             {step === "paste" && (
               <div className="flex flex-col">
-                {/* Format hint */}
                 <div className="px-6 pt-5 pb-3">
                   <div className="rounded-xl border border-border bg-muted/10 p-4">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
@@ -103,20 +101,28 @@ export function PasteCourseModal({
 {`title: Your Course Title
 type: Frontend / Backend / DSA
 purpose: Why you're taking this (optional)
-status: planned | active | paused | completed
 priority: low | medium | high
 
 topics:
   - Topic One
     - Subtopic A
     - Subtopic B
-  - Topic Two
-    - Subtopic C`}
+
+resources:
+  - title: Resource Name
+    url: https://example.com
+
+projects:
+  - title: Project Name
+    description: What to build
+
+assignments:
+  - title: Assignment Name
+    description: What to do`}
                     </pre>
                   </div>
                 </div>
 
-                {/* Textarea */}
                 <div className="px-6 pb-5">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm font-medium text-muted-foreground">
@@ -155,64 +161,11 @@ topics:
             {/* PREVIEW STEP */}
             {step === "preview" && parsed && (
               <div className="px-6 py-5 flex flex-col gap-5">
-                {/* Course meta */}
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                    Course Details
-                  </p>
-                  <div className="rounded-xl border border-border bg-muted/5 p-4 grid grid-cols-2 gap-x-6 gap-y-3">
-                    <MetaRow label="Title" value={parsed.title} span />
-                    {parsed.purpose && (
-                      <MetaRow label="Purpose" value={parsed.purpose} span />
-                    )}
-                    <MetaRow label="Type" value={parsed.type} />
-                    <MetaRow label="Status" value={capitalize(parsed.status)} />
-                    <MetaRow label="Priority" value={capitalize(parsed.priority)} />
-                  </div>
-                </div>
-
-                {/* Topics */}
-                {parsed.topics.length > 0 && (
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Topics & Subtopics
-                      </p>
-                      <span className="text-xs text-muted-foreground bg-muted/20 px-2 py-0.5 rounded-full">
-                        {parsed.topics.length} topics ·{" "}
-                        {parsed.topics.reduce((acc, t) => acc + t.subtopics.length, 0)} subtopics
-                      </span>
-                    </div>
-                    <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
-                      {parsed.topics.map((topic, ti) => (
-                        <div key={ti} className="bg-card">
-                          <div className="flex items-center gap-2 px-4 py-3">
-                            <ChevronRight size={14} className="text-accent shrink-0" />
-                            <span className="text-sm font-medium">{topic.title}</span>
-                            {topic.subtopics.length > 0 && (
-                              <span className="ml-auto text-xs text-muted-foreground">
-                                {topic.subtopics.length}
-                              </span>
-                            )}
-                          </div>
-                          {topic.subtopics.length > 0 && (
-                            <div className="pb-2 pl-10 pr-4 flex flex-col gap-1">
-                              {topic.subtopics.map((sub, si) => (
-                                <div
-                                  key={si}
-                                  className="text-xs text-muted-foreground flex items-center gap-1.5"
-                                >
-                                  <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
-                                  {sub.title}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <CourseMetaPreview parsed={parsed} />
+                {parsed.topics.length > 0 && <TopicsPreview parsed={parsed} />}
+                {parsed.resources.length > 0 && <ResourcesPreview parsed={parsed} />}
+                {parsed.projects.length > 0 && <ProjectsPreview parsed={parsed} />}
+                {parsed.assignments.length > 0 && <AssignmentsPreview parsed={parsed} />}
 
                 {createError && (
                   <div className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 rounded-lg px-4 py-3">
@@ -232,7 +185,7 @@ topics:
                 <div className="text-center">
                   <p className="font-medium text-sm">Creating your course…</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Setting up topics and subtopics
+                    Setting up topics, resources and more
                   </p>
                 </div>
               </div>
@@ -280,6 +233,136 @@ topics:
         message="You've reached the course limit for your current plan. Upgrade to create more courses."
       />
     </Dialog>
+  );
+}
+
+// ─── Preview sub-components ───────────────────────────────────────────────────
+
+function SectionLabel({ children, badge }: { children: React.ReactNode; badge?: string }) {
+  return (
+    <div className="flex items-center justify-between mb-3">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        {children}
+      </p>
+      {badge && (
+        <span className="text-xs text-muted-foreground bg-muted/20 px-2 py-0.5 rounded-full">
+          {badge}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function CourseMetaPreview({ parsed }: { parsed: ParsedCourse }) {
+  return (
+    <div>
+      <SectionLabel>Course Details</SectionLabel>
+      <div className="rounded-xl border border-border bg-muted/5 p-4 grid grid-cols-2 gap-x-6 gap-y-3">
+        <MetaRow label="Title" value={parsed.title} span />
+        {parsed.purpose && <MetaRow label="Purpose" value={parsed.purpose} span />}
+        <MetaRow label="Type" value={parsed.type} />
+        <MetaRow label="Priority" value={capitalize(parsed.priority)} />
+        <MetaRow label="Projects" value={parsed.projectsEnabled ? "Enabled" : "Disabled"} />
+        <MetaRow label="Assignments" value={parsed.assignmentsEnabled ? "Enabled" : "Disabled"} />
+      </div>
+    </div>
+  );
+}
+
+function TopicsPreview({ parsed }: { parsed: ParsedCourse }) {
+  const subtopicCount = parsed.topics.reduce((acc, t) => acc + t.subtopics.length, 0);
+  return (
+    <div>
+      <SectionLabel badge={`${parsed.topics.length} topics · ${subtopicCount} subtopics`}>
+        Topics & Subtopics
+      </SectionLabel>
+      <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+        {parsed.topics.map((topic, ti) => (
+          <div key={ti} className="bg-card">
+            <div className="flex items-center gap-2 px-4 py-3">
+              <ChevronRight size={14} className="text-accent shrink-0" />
+              <span className="text-sm font-medium">{topic.title}</span>
+              {topic.subtopics.length > 0 && (
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {topic.subtopics.length}
+                </span>
+              )}
+            </div>
+            {topic.subtopics.length > 0 && (
+              <div className="pb-2 pl-10 pr-4 flex flex-col gap-1">
+                {topic.subtopics.map((sub, si) => (
+                  <div key={si} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
+                    {sub.title}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ResourcesPreview({ parsed }: { parsed: ParsedCourse }) {
+  return (
+    <div>
+      <SectionLabel badge={`${parsed.resources.length}`}>Resources</SectionLabel>
+      <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+        {parsed.resources.map((r, i) => (
+          <div key={i} className="flex items-center gap-3 px-4 py-3 bg-card">
+            <Link size={13} className="text-accent shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">{r.title}</p>
+              <p className="text-xs text-muted-foreground truncate">{r.url}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProjectsPreview({ parsed }: { parsed: ParsedCourse }) {
+  return (
+    <div>
+      <SectionLabel badge={`${parsed.projects.length}`}>Projects</SectionLabel>
+      <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+        {parsed.projects.map((p, i) => (
+          <div key={i} className="flex items-start gap-3 px-4 py-3 bg-card">
+            <FolderOpen size={13} className="text-accent shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">{p.title}</p>
+              {p.description && (
+                <p className="text-xs text-muted-foreground mt-0.5">{p.description}</p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AssignmentsPreview({ parsed }: { parsed: ParsedCourse }) {
+  return (
+    <div>
+      <SectionLabel badge={`${parsed.assignments.length}`}>Assignments</SectionLabel>
+      <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+        {parsed.assignments.map((a, i) => (
+          <div key={i} className="flex items-start gap-3 px-4 py-3 bg-card">
+            <BookOpen size={13} className="text-accent shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">{a.title}</p>
+              {a.description && (
+                <p className="text-xs text-muted-foreground mt-0.5">{a.description}</p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { APIError, Course, saveCourse, Topic, Subtopic } from "@/lib/api/course";
-import { createCourseAction } from "@/lib/course/createCourseAction";
+import { APIError, Course } from "@/lib/api/course";
 import { ParsedCourse, parseCourseFormat } from "./parseCourseFormat";
+import { createCourseFromParsed } from "./createCourseFromParsed";
 
 export type Step = "paste" | "preview" | "creating";
 
@@ -62,68 +62,9 @@ export function usePasteCourse({
     setCreateError(null);
 
     try {
-      // 1. Create the course shell — response shape: { status, course: { course_id, ... } }
-      const data = await createCourseAction({
-        userId,
-        title: parsed.title,
-        purpose: parsed.purpose,
-        type: parsed.type,
-        status: parsed.status,
-        priority: parsed.priority,
-        projectsEnabled: parsed.projectsEnabled,
-        assignmentsEnabled: parsed.assignmentsEnabled,
-      });
-
-      // Safely extract course_id — log the full response to catch mismatches
-      console.log("[PasteCourse] createCourseAction response:", data);
-
-      // Backend returns { status, course: [...] } — course is an array
-      const courseObj = Array.isArray(data?.course) ? data.course[0] : data?.course;
-      const courseId: string = courseObj?.course_id;
-
-      if (!courseId) {
-        throw new Error(
-          `Could not extract course_id from response: ${JSON.stringify(data)}`
-        );
-      }
-
-      // 2. Build topics payload — strip any leading dashes from titles
-      const topics: Topic[] = parsed.topics.map((t, ti) => ({
-        topic_id: null,
-        title: t.title.replace(/^-\s*/, "").trim(),
-        status: "not_started",
-        position: ti,
-        subtopics: t.subtopics.map((s, si) => ({
-          subtopic_id: null,
-          title: s.title.replace(/^-\s*/, "").trim(),
-          is_completed: false,
-          position: si,
-        })) as unknown as Subtopic[],
-      }));
-
-      // 3. Save course with topics (only if there are topics to save)
-      if (topics.length > 0) {
-        await saveCourse(courseId, {
-          user_id: userId,
-          course_id: courseId,
-          course: {
-            title: parsed.title,
-            type: parsed.type,
-            status: parsed.status,
-            priority: parsed.priority,
-            purpose: parsed.purpose ?? null,
-            projects_enabled: parsed.projectsEnabled,
-            assignments_enabled: parsed.assignmentsEnabled,
-          },
-          topics,
-          resources: [],
-          projects: [],
-          assignments: [],
-        });
-      }
-
+      const course = await createCourseFromParsed(userId, parsed);
       reset();
-      onCreated(courseObj);
+      onCreated(course);
       onClose();
     } catch (err: unknown) {
       console.error("[PasteCourse] handleCreate error:", err);
@@ -145,7 +86,7 @@ export function usePasteCourse({
 
   const loadTemplate = () => {
     setRaw(
-      `title: React Complete Guide\ntype: Frontend\npurpose: Master React from fundamentals to advanced patterns\nstatus: planned\npriority: high\n\ntopics:\n  - Introduction to React\n    - What is React and why use it\n    - Setting up a React project\n  - Components & Props\n    - Functional components\n    - Props and prop types`
+      `title: React Complete Guide\ntype: Frontend\npurpose: Master React from fundamentals to advanced patterns\npriority: high\n\ntopics:\n  - Introduction to React\n    - What is React and why use it\n    - Setting up a React project\n  - Components & Props\n    - Functional components\n    - Props and prop types\n\nresources:\n  - title: React Official Docs\n    url: https://react.dev\n\nprojects:\n  - title: Todo App\n    description: Build a full CRUD todo app\n\nassignments:\n  - title: JSX Exercises\n    description: Complete 10 JSX transformation exercises`
     );
     setParseError(null);
   };
