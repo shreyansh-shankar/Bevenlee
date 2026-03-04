@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
-import { Plus, Map } from "lucide-react";
+import { Plus, Map, ClipboardPaste } from "lucide-react";
 import { AddCourseModal } from "./AddCourseModal";
+import { PasteCourseModal } from "./PasteCourseModal";
 import { useRouter } from "next/navigation";
 import { Course } from "@/lib/api/course";
 
@@ -12,6 +14,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ userId, onCourseCreated }: DashboardHeaderProps) {
   const [open, setOpen] = useState(false);
+  const [pasteOpen, setPasteOpen] = useState(false);
   const router = useRouter();
 
   return (
@@ -32,6 +35,13 @@ export function DashboardHeader({ userId, onCourseCreated }: DashboardHeaderProp
             Roadmaps
           </button>
           <button
+            onClick={() => setPasteOpen(true)}
+            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted/40 transition"
+          >
+            <ClipboardPaste size={16} />
+            Import Course
+          </button>
+          <button
             className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 transition"
             onClick={() => setOpen(true)}
           >
@@ -40,6 +50,7 @@ export function DashboardHeader({ userId, onCourseCreated }: DashboardHeaderProp
           </button>
         </div>
       </div>
+
       <AddCourseModal
         isOpen={open}
         onClose={() => setOpen(false)}
@@ -47,6 +58,16 @@ export function DashboardHeader({ userId, onCourseCreated }: DashboardHeaderProp
         onCreated={(course: Course) => {
           onCourseCreated();
           setOpen(false);
+        }}
+      />
+
+      <PasteCourseModal
+        isOpen={pasteOpen}
+        onClose={() => setPasteOpen(false)}
+        userId={userId}
+        onCreated={(course: Course) => {
+          onCourseCreated();
+          setPasteOpen(false);
         }}
       />
     </>

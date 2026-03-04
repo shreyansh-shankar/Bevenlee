@@ -112,6 +112,8 @@ export async function createCourse(payload: CreateCoursePayload) {
 
   const data = await res.json()
 
+  console.log(data)
+
   if (!res.ok) {
     throw new APIError(
       data?.detail?.message || "Failed to create course",
@@ -144,7 +146,6 @@ export async function getCoursesByUser(userId: string, accessToken?: string): Pr
   }
 
   const data = await res.json()
-  console.log("Dashborad fetch data: ", data)
 
   // backend returns { status, courses }
   return data.courses as Course[]
