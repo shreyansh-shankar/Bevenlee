@@ -1,15 +1,18 @@
 "use client";
 
+import { useState } from "react";
+
 import { Dialog } from "@headlessui/react";
 import {
   X, ClipboardPaste, ChevronRight, Link,
   AlertCircle, CheckCircle2, Loader2, RotateCcw,
-  FolderOpen, BookOpen,
+  FolderOpen, BookOpen, Sparkles,
 } from "lucide-react";
 import { Course } from "@/lib/api/course";
 import { UpgradeModal } from "@/components/subscription/UpgradeModal";
 import { usePasteCourse } from "@/lib/backend/usePasteCourse";
 import { FORMAT_TEMPLATE, ParsedCourse } from "@/lib/backend/parseCourseFormat";
+import { AIPromptWizard } from "./AIPromptWizard";
 
 interface PasteCourseModalProps {
   isOpen: boolean;
@@ -37,6 +40,8 @@ export function PasteCourseModal({
     handleCreate,
     loadTemplate,
   } = usePasteCourse({ isOpen, userId, onCreated, onClose });
+
+  const [showWizard, setShowWizard] = useState(false);
 
   return (
     <Dialog open={isOpen} onClose={handleClose} className="relative z-50">
@@ -92,12 +97,57 @@ export function PasteCourseModal({
             {/* PASTE STEP */}
             {step === "paste" && (
               <div className="flex flex-col">
+
+                {/* ── Generate with AI toggle ── */}
                 <div className="px-6 pt-5 pb-3">
-                  <div className="rounded-xl border border-border bg-muted/10 p-4">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                      Expected Format
-                    </p>
-                    <pre className="text-xs text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap">
+                  <button
+                    onClick={() => setShowWizard((v) => !v)}
+                    className={`w-full flex items-center gap-3 rounded-xl border px-4 py-3 text-sm transition ${
+                      showWizard
+                        ? "border-accent/40 bg-accent/5 text-accent"
+                        : "border-border hover:bg-muted/20 text-foreground"
+                    }`}
+                  >
+                    <Sparkles size={15} className={showWizard ? "text-accent" : "text-muted-foreground"} />
+                    <div className="text-left">
+                      <p className="font-medium text-sm leading-tight">Generate with AI</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Get a prompt to paste into ChatGPT, Claude, or Gemini
+                      </p>
+                    </div>
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {showWizard ? "Hide ↑" : "Try it →"}
+                    </span>
+                  </button>
+                </div>
+
+                {/* ── AI Wizard (shown inline when toggled) ── */}
+                {showWizard && (
+                  <div className="mx-6 mb-3 rounded-xl border border-border bg-muted/5 overflow-hidden">
+                    <AIPromptWizard
+                      onClose={() => setShowWizard(false)}
+                      onDone={() => setShowWizard(false)}
+                    />
+                  </div>
+                )}
+
+                {/* ── Divider ── */}
+                {showWizard && (
+                  <div className="flex items-center gap-3 px-6 mb-3">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs text-muted-foreground">or paste manually</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                )}
+
+                {/* ── Format hint ── */}
+                {!showWizard && (
+                  <div className="px-6 pb-3">
+                    <div className="rounded-xl border border-border bg-muted/10 p-4">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        Expected Format
+                      </p>
+                      <pre className="text-xs text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap">
 {`title: Your Course Title
 type: Frontend / Backend / DSA
 purpose: Why you're taking this (optional)
@@ -119,22 +169,26 @@ projects:
 assignments:
   - title: Assignment Name
     description: What to do`}
-                    </pre>
+                      </pre>
+                    </div>
                   </div>
-                </div>
+                )}
 
+                {/* ── Textarea ── */}
                 <div className="px-6 pb-5">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm font-medium text-muted-foreground">
                       Paste your course outline
                     </label>
-                    <button
-                      onClick={loadTemplate}
-                      className="text-xs text-accent hover:underline flex items-center gap-1"
-                    >
-                      <RotateCcw size={11} />
-                      Load example
-                    </button>
+                    {!showWizard && (
+                      <button
+                        onClick={loadTemplate}
+                        className="text-xs text-accent hover:underline flex items-center gap-1"
+                      >
+                        <RotateCcw size={11} />
+                        Load example
+                      </button>
+                    )}
                   </div>
                   <textarea
                     ref={textareaRef}
@@ -145,7 +199,7 @@ assignments:
                     }}
                     placeholder={FORMAT_TEMPLATE}
                     className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder:text-muted-foreground/30 leading-relaxed"
-                    style={{ minHeight: "240px" }}
+                    style={{ minHeight: "180px" }}
                     spellCheck={false}
                   />
                   {parseError && (
