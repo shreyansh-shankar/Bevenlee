@@ -13,10 +13,11 @@ import { Switch } from "@/components/ui/switch";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EditableField } from "../../ui/EditableField";
 import { ShareButton } from "@/components/course/share/ShareButton";
+import { AddToLibraryButton } from "@/components/library/AddToLibraryButton";
 import { useCourseEditor } from "../editor/CourseEditorContext";
 
 export function CourseHeader() {
-  const { draft, setDraft, markDirty, isPro } = useCourseEditor();
+  const { draft, setDraft, markDirty, isPro, userId } = useCourseEditor();
 
   const update = (patch: Partial<typeof draft>) => {
     setDraft(d => ({
@@ -30,7 +31,7 @@ export function CourseHeader() {
 
   return (
     <div className="flex flex-col gap-6 pb-8">
-      {/* ───────── TITLE + SHARE ───────── */}
+      {/* ───────── TITLE + ACTIONS ───────── */}
       <div className="flex flex-col gap-4 max-w-5xl">
         <div className="flex items-start justify-between gap-4">
           {/* TITLE */}
@@ -60,8 +61,13 @@ export function CourseHeader() {
             </EditableField>
           </div>
 
-          {/* SHARE */}
-          <div className="shrink-0 pt-1">
+          {/* SHARE + ADD TO LIBRARY */}
+          <div className="shrink-0 pt-1 flex items-center gap-2">
+            <AddToLibraryButton
+              courseId={draft.course_id}
+              userId={userId}
+              isPro={isPro}
+            />
             <ShareButton courseId={draft.course_id} isPro={isPro} />
           </div>
         </div>

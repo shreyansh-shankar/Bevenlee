@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { CourseEditorContext } from "./CourseEditorContext";
 import { DraftCourse, hydrateDraftCourse } from "@/lib/course/draft";
@@ -25,13 +24,9 @@ export function CourseEditorProvider({
     }
   }, [initialData]);
 
-  // ✅ non-null safe setter exposed to consumers
-  const setDraft: React.Dispatch<
-    React.SetStateAction<DraftCourse>
-  > = (updater) => {
+  const setDraft: React.Dispatch<React.SetStateAction<DraftCourse>> = (updater) => {
     _setDraft(prev => {
       if (!prev) return prev;
-
       return typeof updater === "function"
         ? (updater as (d: DraftCourse) => DraftCourse)(prev)
         : updater;
@@ -42,11 +37,11 @@ export function CourseEditorProvider({
     setDraft(d => ({ ...d, isDirty: true }));
   }
 
-  if (!draft) return null; // loading / skeleton
+  if (!draft) return null;
 
   return (
     <CourseEditorContext.Provider
-      value={{ draft, setDraft, markDirty, isPro }}
+      value={{ draft, setDraft, markDirty, isPro, userId }}
     >
       {children}
     </CourseEditorContext.Provider>

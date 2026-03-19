@@ -1,5 +1,4 @@
 "use client";
-
 import { createContext, useContext } from "react";
 import { DraftCourse } from "@/lib/course/draft";
 
@@ -8,6 +7,7 @@ interface CourseEditorContextValue {
   setDraft: React.Dispatch<React.SetStateAction<DraftCourse>>;
   markDirty: () => void;
   isPro: boolean;
+  userId: string;
 }
 
 export const CourseEditorContext =

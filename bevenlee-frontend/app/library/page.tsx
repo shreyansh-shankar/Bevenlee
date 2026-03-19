@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"
 import { LibraryCard } from "@/components/library/LibraryCard"
 import { CloneModal } from "@/components/library/CloneModal"
 import { LibraryFilters } from "@/components/library/LibraryFilters"
@@ -45,7 +45,7 @@ export default function LibraryPage() {
   useEffect(() => {
     async function init() {
       try {
-        const supabase = createClient()
+        const supabase = getSupabaseBrowserClient()
         const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) {
@@ -56,7 +56,7 @@ export default function LibraryPage() {
         setUserId(user.id)
 
         // Read plan from users table directly via Supabase client
-        const { data: profile } = await supabase
+        const { data: profile } = await getSupabaseBrowserClient()
           .from("users")
           .select("subscribed_plan")
           .eq("user_id", user.id)
