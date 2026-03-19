@@ -55,14 +55,14 @@ export default function LibraryPage() {
 
         setUserId(user.id)
 
-        // Read plan from users table directly via Supabase client
-        const { data: profile } = await getSupabaseBrowserClient()
-          .from("users")
-          .select("subscribed_plan")
-          .eq("user_id", user.id)
-          .single()
-
-        setPlanId(profile?.subscribed_plan ?? 0)
+        // Fetch plan via API route (server-side, avoids RLS)
+        const planRes = await fetch("/api/user/plan")
+        if (planRes.ok) {
+          const planData = await planRes.json()
+          setPlanId(planData.plan?.id ?? 0)
+        } else {
+          setPlanId(0)
+        }
       } catch {
         router.push("/login?redirect=/library")
       } finally {
